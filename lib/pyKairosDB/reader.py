@@ -57,6 +57,9 @@ def read(conn, metric_names, start_absolute=None, start_relative=None, end_absol
                            The (int or float) contains the quantity of the time units that will be retrieved.
                            The string is the unit, containing "seconds", "minutes",
                           "hours", "days", "weeks", "months", or "years".
+
+    :rtype: dict
+    :return: a dictionary that reflects the json returned from the kairosdb.
     """
     if start_relative is not None:
         query = _query_relative(start_relative, end_relative)
@@ -124,6 +127,7 @@ def _query_absolute(start, end):
 def read_relative(conn, metric_names, start, end=None):
     """If end_relative is empty, "now" is implied"""
     return read(conn, metric_names, start_relative=start, end_relative=end)
+
 
 def _change_timestamps_to_python(content):
     """Change timestamps from millis since the epoch to seconds since

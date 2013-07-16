@@ -3,6 +3,7 @@
 import requests
 from . import writer
 from . import reader
+from . import metadata
 
 class KairosDBConnection(object):
 
@@ -12,12 +13,8 @@ class KairosDBConnection(object):
         self.port = port
 
         # http://docs.python-requests.org/en/latest/user/advanced/#keep-alive
+        metadata.get_server_version(self) # XXX check for failure to connect
         self.generate_urls()
-
-    def connect():
-        """TODO: test the connection by making a bogus request"""
-        self.generate_urls()
-        # self.validat_connection()
 
 
     def generate_urls(self):

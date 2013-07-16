@@ -2,8 +2,8 @@
 
 import pyKairosDB
 import time
-
-# use this after a read test
+import sys
 
 c = pyKairosDB.connect() # use localhost:8080, the default, no ssl
-r = c.write_one_metric("test", time.time(), time.time(), tags = {"graphite" : "yes"})
+
+print pyKairosDB.metadata.get_all_metric_names(c)
