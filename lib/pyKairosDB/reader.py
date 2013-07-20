@@ -32,10 +32,78 @@ import json
 # Out[7]: '{"errors":["\\"day\\" is not a valid time unit, must be one of MILLISECONDS,SECONDS,MINUTES,HOURS,DAYS,WEEKS,MONTHS,YEARS"]}'
 VALID_UNITS = ("milliseconds", "seconds", "minutes", "hours", "days", "weeks", "months", "years")
 
+def default_group_by():
+    """Returns a dict that will have an group_by that can be modified"""
+    return {
+              "name": "time",
+              "group_count": "1",
+              "range_size": {
+                "value": "1",
+                "unit": "minutes"
+              }
+            }
 
-def read(conn, metric_names, start_absolute=None, start_relative=None, end_absolute=None, end_relative=None):
+def default_aggregator():
+    """Returns a dict that will have an aggregator that can be modified"""
+    return {
+              "name": "avg",
+              "sampling": {
+                "value": "1",
+                "unit": "minutes"
+               }
+           }
+
+
+def group_by(group_by_list, metric_name, query_dict):
     """
-    :type conn: pyKairosDB.connect object
+    :type group_by_list: list
+    :param group_by_list: a list of group-by clauses, e.g: the list within this:
+
+         "group_by": [ {
+              "name": "time",
+              "group_count": "1",
+              "range_size": {
+                "value": "1",
+                "unit": "minutes"
+              }
+            } ],
+
+    should result in grouping/bucketing of values that would be
+    friendly for a graphite data series that used a reporting period
+    of a minute (along with aggreagtion on the minute).
+    """
+    print query_dict
+    query_dict["metrics"][0]["group_by"] = group_by_list
+
+def aggregation(aggregation_list, metric_name, query_dict):
+    """
+    :type aggregation_list: list
+    :param aggregation_list: A list of aggregation clauses.  E.g. the list within this:
+          "aggregators": [ {
+              "name": "avg",
+              "sampling": {
+                "value": "1",
+                "unit": "minutes"
+               }
+           } ]
+
+    Combining this with a minutes group-by gives us datasets that graphite will like.
+    """
+    query_dict["metrics"][0]["aggregators"] = aggregation_list
+
+def cache_time(cache_time, query_dict):
+    """
+    :type cache_time: int
+    :param cache_time: If desired, the number of seconds for kairos to save the query for re-use
+
+    Combining this with a minutes group-by gives us datasets that graphite will like.
+    """
+    query_dict["cache_time"] = cache_time
+
+
+def read(conn, metric_names, start_absolute=None, start_relative=None,
+         end_absolute=None, end_relative=None, query_modifying_function=None):
+    """:type conn: pyKairosDB.connect object
     :param conn: the interface to the requests library
 
     :type metric_names: list
@@ -58,14 +126,20 @@ def read(conn, metric_names, start_absolute=None, start_relative=None, end_absol
                            The string is the unit, containing "seconds", "minutes",
                           "hours", "days", "weeks", "months", or "years".
 
+    :type query_modifying_function: callable
+    :param query_modifying_function: A function that will be given the query, and will modify it as needed.
+
     :rtype: dict
     :return: a dictionary that reflects the json returned from the kairosdb.
+
     """
     if start_relative is not None:
         query = _query_relative(start_relative, end_relative)
     elif start_absolute is not None:
         query = _query_absolute(start_absolute, end_absolute)
     query["metrics"] = [ {"name" : m } for m in metric_names ]
+    if query_modifying_function is not None:
+        query_modifying_function(query)
     r = requests.post(conn.read_url, json.dumps(query))
     return _change_timestamps_to_python(r.content)
 
@@ -122,11 +196,15 @@ def _query_absolute(start, end):
     return query
 
 
-
-
-def read_relative(conn, metric_names, start, end=None):
+def read_relative(conn, metric_names, start, end=None, tags=None, query_modifying_function=None):
     """If end_relative is empty, "now" is implied"""
-    return read(conn, metric_names, start_relative=start, end_relative=end)
+    return read(conn, metric_names, start_relative=start, end_relative=end,
+        query_modifying_function=query_modifying_function)
+
+def read_absolute(conn, metric_names, start, end=None, tags=None, query_modifying_function=None):
+    """If end_absolute is empty, time.time() is implied"""
+    return read(conn, metric_names, start_absolute=start, end_absolute=end,
+        query_modifying_function=query_modifying_function)
 
 
 def _change_timestamps_to_python(content):

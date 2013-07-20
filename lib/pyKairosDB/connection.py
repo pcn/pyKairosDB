@@ -4,6 +4,7 @@ import requests
 from . import writer
 from . import reader
 from . import metadata
+from . import graphite
 
 class KairosDBConnection(object):
 
@@ -32,5 +33,10 @@ class KairosDBConnection(object):
     def write_metrics(self, metric_list):
         return writer.write_metrics_list(self, metric_list)
 
-    def read_relative(self, metric_names_list, start, end=None):
-        return reader.read_relative(self, metric_names_list, start, end)
+    def read_relative(self, metric_names_list, start, end=None, query_modifying_function=None):
+        return reader.read_relative(self, metric_names_list, start, end,
+            query_modifying_function=query_modifying_function)
+
+    def read_absolute(self, metric_names_list, start, end=None, query_modifying_function=None):
+        return reader.read_absolute(self, metric_names_list, start, end,
+            query_modifying_function=query_modifying_function)

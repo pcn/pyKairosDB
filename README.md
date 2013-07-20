@@ -42,3 +42,30 @@ TODO
 
 * Add convenience functions that'll make it easier to create metrics
   in the correct format.
+
+Working with Graphite
+=====================
+
+Graphite has two requirements for a data store.  The first is that the
+data it receives be in uniform steps.  It defines the retentions in
+its configuration file "storage-schemas.conf", where you say that some
+metric should be saved via a set of rules that define its retention
+policy.
+
+For the purpose of using KairosDB with Graphite, it seems like the
+best way to store this is in the tags associated with the metric being
+sent.
+
+So every metric that graphite will query MUST have the following tags,
+all lower-case:
+
+```
+"graphite" : "true",
+"storage-schema-name" : "default_1min_for_1day"
+"storage-schema-retentions" : "60s:1d"
+```
+
+The grahite webui will be able to read the "storage-schema-retentions"
+list of tags that comes back from the server, and it'll use the lowest
+resolution data for the period being queried to generate the resulting
+graph data.

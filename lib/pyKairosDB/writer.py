@@ -65,7 +65,7 @@ def write_metrics_list(conn, metric_list):
     :type conn: pyKairosDB.connect object
     :param conn: The interface to the requests library
 
-    :type metrics_list: list()
+    :type metrics_list: list
     :param metrics_list: list of dicts, each dict is a metric that will be sent to KairosDB
 
     :rtype: request.response

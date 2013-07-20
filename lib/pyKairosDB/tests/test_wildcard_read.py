@@ -13,9 +13,10 @@ from pyKairosDB import util as util
 
 c = pyKairosDB.connect() # use localhost:8080, the default, no ssl
 
-first_metrics_list = pyKairosDB.util.expand_graphite_wildcard_metric_name(c, "test.*.*")
-second_metrics_list = pyKairosDB.util.expand_graphite_wildcard_metric_name(c, "test.bar.*")
-assert(first_metrics_list == second_metrics_list)
+first_metrics_list = pyKairosDB.graphite.expand_graphite_wildcard_metric_name(c, "test.*.*.*")
+# second_metrics_list = pyKairosDB.util.expand_graphite_wildcard_metric_name(c, "test.bar.*")
+
+# assert(first_metrics_list == second_metrics_list)
 
 # print second_metrics_list
 
