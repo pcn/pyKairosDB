@@ -54,7 +54,7 @@ def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
     :rtype: list
     :return: a list of unicode strings.  Each unicode string contains an expanded metric name
     """
-    # leaf_or_branch() needs this shortcut to be removed.
+
     if "*" not in name:
         return [u'{0}'.format(name)]
 
@@ -67,6 +67,8 @@ def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
         _make_graphite_name_cache(cache_tree, all_metric_name_list)
         expand_graphite_wildcard_metric_name.cache_tree      = cache_tree
         expand_graphite_wildcard_metric_name.cache_timestamp = time.time()
+    if name == "*": # special case for the root of the tree:
+        return cache_tree.keys()
     expanded_name_list = util.metric_name_wildcard_expansion(cache_tree, name_list)
     return [ u".".join(en) for en in expanded_name_list]
 
