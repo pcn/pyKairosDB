@@ -5,6 +5,7 @@ from . import util
 from util import tree
 from . import metadata
 from . import reader
+from collections import deque
 
 
 RETENTION_TAG = "storage-schema-retentions"
@@ -90,7 +91,6 @@ def leaf_or_branch(conn, name):
     :return: Returns either "leaf" or "branch"
     """
     wildcard_expansion = expand_graphite_wildcard_metric_name(conn, name + ".*")
-    print "wildcard_expansion is {0}".format(wildcard_expansion)
     if len(wildcard_expansion) > 0:
         return "branch"
     else:
@@ -216,7 +216,33 @@ def read_absolute(conn, metric_name, start_time, end_time):
             reader.group_by([group_by], metric_name, query_dict)
             reader.aggregation([aggregator], metric_name, query_dict)
         return modify_query_closure
-    # re-fetch now that we've gotten the content
+    # re-fetch now that we've gotten the content and set the retention time.
     content = conn.read_absolute([metric_name], start_time, end_time,
         query_modifying_function=modify_query())
-    return ((start_time, end_time, interval_seconds), [v[1] for v in content["queries"][0]["results"][0]["values"]])
+
+    # by_interval_dict = dict([(v[1], v[0]) for v in content["queries"][0]["results"][0]["values"] ])
+    return_list = list()
+    value_deque = deque(content["queries"][0]["results"][0]["values"])
+    slots = list()
+    for slot_begin in range(start_time, end_time, interval_seconds):
+        slot_buffer = list()
+        slot_end = slot_begin + interval_seconds
+        slots.append((slot_begin, slot_end))
+        if slot_end < value_deque[0][0]: # we haven't caught up with the beginning of the deque
+            return_list.append(None)
+            continue
+        if slot_begin > value_deque[-1][0]: # We have nothing more of value
+            return_list.append(None)
+            continue
+        if len(value_deque) == 0:
+            continue
+        try:
+            while slot_begin <= value_deque[0][0] < slot_end:
+                slot_buffer.append(value_deque.popleft()[1])
+        except IndexError:
+            pass
+        if len(slot_buffer) < 1:
+            return_list.append(None)
+        else:
+            return_list.append(sum(slot_buffer)/len(slot_buffer)) # take the average of the points for this slot
+    return ((start_time, end_time, interval_seconds), return_list)
