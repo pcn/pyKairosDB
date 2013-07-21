@@ -38,6 +38,7 @@ def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
     Substring expansions aren't supported at this time.
 
     XXX should they be?  Check in graphite-web's finders.py
+    XXX they do it in a simpler way, with fnmatch.
 
     Cache the created tree for cache_ttl seconds and refresh when the cache has aged.
 
@@ -54,8 +55,8 @@ def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
     :return: a list of unicode strings.  Each unicode string contains an expanded metric name
     """
     # leaf_or_branch() needs this shortcut to be removed.
-    # if "*" not in name:
-    #     return [u'{0}.'.format(name)]
+    if "*" not in name:
+        return [u'{0}'.format(name)]
 
     name_list = [ u'{0}'.format(n) for n in name.split(".")]
     ts        = expand_graphite_wildcard_metric_name.cache_timestamp
@@ -75,7 +76,7 @@ expand_graphite_wildcard_metric_name.cache_timestamp = 0
 
 def leaf_or_branch(conn, name):
     """Graphite wants to know if a name is a "leaf" or a "branch" -
-    that is, wether or not it can be traversed further
+    that is, whether or not it can be traversed further
 
     :type conn: pyKairosDB.connection
     :param conn: Connection to the pyrosdb
@@ -86,7 +87,8 @@ def leaf_or_branch(conn, name):
     :rtype str:
     :return: Returns either "leaf" or "branch"
     """
-    wildcard_expansion = expand_graphite_wildcard_metric_name(name + ".*")
+    wildcard_expansion = expand_graphite_wildcard_metric_name(conn, name + ".*")
+    print "wildcard_expansion is {0}".format(wildcard_expansion)
     if len(wildcard_expansion) > 0:
         return "branch"
     else:
@@ -215,4 +217,4 @@ def read_absolute(conn, metric_name, start_time, end_time):
     # re-fetch now that we've gotten the content
     content = conn.read_absolute([metric_name], start_time, end_time,
         query_modifying_function=modify_query())
-    return ((start_time, end_time, interval_seconds), content["queries"][0]["results"][0]["values"])
+    return ((start_time, end_time, interval_seconds), [v[1] for v in content["queries"][0]["results"][0]["values"]])
