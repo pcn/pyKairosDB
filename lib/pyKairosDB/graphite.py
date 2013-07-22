@@ -248,31 +248,33 @@ def read_absolute(conn, metric_name, start_time, end_time):
     # re-fetch now that we've gotten the content and set the retention time.
     content = conn.read_absolute([metric_name], start_time, end_time,
         query_modifying_function=modify_query())
-
-    # by_interval_dict = dict([(v[1], v[0]) for v in content["queries"][0]["results"][0]["values"] ])
     return_list = list()
-    value_deque = deque(content["queries"][0]["results"][0]["values"])
-    slots = list()
-    for slot_begin in range(start_time, end_time, interval_seconds):
-        slot_buffer = list()
-        slot_end = slot_begin + interval_seconds
-        slots.append((slot_begin, slot_end))
-        try:
-            if slot_end < value_deque[0][0]: # we haven't caught up with the beginning of the deque
+    if len(content['queries'][0]['results']) > 0:
+        # by_interval_dict = dict([(v[1], v[0]) for v in content["queries"][0]["results"][0]["values"] ])
+        value_deque = deque(content["queries"][0]["results"][0]["values"])
+        slots = list()
+        for slot_begin in range(start_time, end_time, interval_seconds):
+            slot_buffer = list()
+            slot_end = slot_begin + interval_seconds
+            slots.append((slot_begin, slot_end))
+            try:
+                if slot_end < value_deque[0][0]: # we haven't caught up with the beginning of the deque
+                    return_list.append(None)
+                    continue
+                if slot_begin > value_deque[-1][0]: # We have nothing more of value
+                    return_list.append(None)
+                    continue
+                if len(value_deque) == 0:
+                    return_list.append(None)
+                    continue
+                while slot_begin <= value_deque[0][0] < slot_end:
+                    slot_buffer.append(value_deque.popleft()[1])
+            except IndexError:
                 return_list.append(None)
-                continue
-            if slot_begin > value_deque[-1][0]: # We have nothing more of value
+            if len(slot_buffer) < 1:
                 return_list.append(None)
-                continue
-            if len(value_deque) == 0:
-                return_list.append(None)
-                continue
-            while slot_begin <= value_deque[0][0] < slot_end:
-                slot_buffer.append(value_deque.popleft()[1])
-        except IndexError:
-            return_list.append(None)
-        if len(slot_buffer) < 1:
-            return_list.append(None)
-        else:
-            return_list.append(sum(slot_buffer)/len(slot_buffer)) # take the average of the points for this slot
+            else:
+                return_list.append(sum(slot_buffer)/len(slot_buffer)) # take the average of the points for this slot
+    else:
+        return_list = [ None for n in range(start_time, end_time, interval_seconds)]
     return ((start_time, end_time, interval_seconds), return_list)
