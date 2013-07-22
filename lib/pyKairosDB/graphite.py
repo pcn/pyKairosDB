@@ -228,19 +228,20 @@ def read_absolute(conn, metric_name, start_time, end_time):
         slot_buffer = list()
         slot_end = slot_begin + interval_seconds
         slots.append((slot_begin, slot_end))
-        if slot_end < value_deque[0][0]: # we haven't caught up with the beginning of the deque
-            return_list.append(None)
-            continue
-        if slot_begin > value_deque[-1][0]: # We have nothing more of value
-            return_list.append(None)
-            continue
-        if len(value_deque) == 0:
-            continue
         try:
+            if slot_end < value_deque[0][0]: # we haven't caught up with the beginning of the deque
+                return_list.append(None)
+                continue
+            if slot_begin > value_deque[-1][0]: # We have nothing more of value
+                return_list.append(None)
+                continue
+            if len(value_deque) == 0:
+                return_list.append(None)
+                continue
             while slot_begin <= value_deque[0][0] < slot_end:
                 slot_buffer.append(value_deque.popleft()[1])
         except IndexError:
-            pass
+            return_list.append(None)
         if len(slot_buffer) < 1:
             return_list.append(None)
         else:
