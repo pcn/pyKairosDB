@@ -1,0 +1,930 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyKairosDB Package &mdash; pyKairosDB 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pyKairosDB 0.0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">pyKairosDB 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pykairosdb-package">
+<h1>pyKairosDB Package<a class="headerlink" href="#pykairosdb-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">pyKairosDB</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-pyKairosDB.__init__"></span><dl class="function">
+<dt id="pyKairosDB.__init__.connect">
+<tt class="descclassname">pyKairosDB.__init__.</tt><tt class="descname">connect</tt><big>(</big><em>server='localhost'</em>, <em>port='8080'</em>, <em>ssl=False</em><big>)</big><a class="headerlink" href="#pyKairosDB.__init__.connect" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>server</strong> (<em>str</em>) &#8211; the host to connect to that is running KairosDB</li>
+<li><strong>port</strong> (<em>str</em>) &#8211; the port, as a string, that the KairosDB instance is running on</li>
+<li><strong>ssl</strong> (<em>bool</em>) &#8211; Whether or not to use ssl for this connection.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">KairosDBConnection</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A connection object to the database</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>This wraps the pyKairosDB.connection.KairosDBConnection constructor and returns an
+instance of that class.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyKairosDB.connection">
+<span id="connection-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">connection</span></tt> Module<a class="headerlink" href="#module-pyKairosDB.connection" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyKairosDB.connection.KairosDBConnection">
+<em class="property">class </em><tt class="descclassname">pyKairosDB.connection.</tt><tt class="descname">KairosDBConnection</tt><big>(</big><em>server='localhost'</em>, <em>port='8080'</em>, <em>ssl=False</em><big>)</big><a class="headerlink" href="#pyKairosDB.connection.KairosDBConnection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>server</strong> (<em>str</em>) &#8211; the host to connect to that is running KairosDB</li>
+<li><strong>port</strong> (<em>str</em>) &#8211; the port, as a string, that the KairosDB instance is running on</li>
+<li><strong>ssl</strong> (<em>bool</em>) &#8211; Whether or not to use ssl for this connection.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyKairosDB.connection.KairosDBConnection.read_absolute">
+<tt class="descname">read_absolute</tt><big>(</big><em>metric_names_list</em>, <em>start_time</em>, <em>end_time=None</em>, <em>query_modifying_function=None</em><big>)</big><a class="headerlink" href="#pyKairosDB.connection.KairosDBConnection.read_absolute" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>metric_names_list</strong> (<em>list</em>) &#8211; list of metric names to be queried</li>
+<li><strong>start_time</strong> (<em>float</em>) &#8211; The start time for this read request as seconds since the epoch (per python&#8217;s time.time())</li>
+<li><strong>end_time</strong> (<em>float</em>) &#8211; The end time for this read request as seconds since the epoch (per python&#8217;s time.time())</li>
+<li><strong>query_modifying_function</strong> (<em>function</em>) &#8211; A function that accepts one argument: the query being created.  It can be used
+to arbitrarily modify the contents of the request.  Intended for applying modifications to aggregators and
+grouping and caching when appropriate values for these are discovered.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">requests.response</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a requests.response object with the results of the write</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Read values for the requested metrics using an absolute start time, and optionally an absolute end time (or don&#8217;t use
+an end time, which means time.time())</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyKairosDB.connection.KairosDBConnection.read_relative">
+<tt class="descname">read_relative</tt><big>(</big><em>metric_names_list</em>, <em>start_time</em>, <em>end_time=None</em>, <em>query_modifying_function=None</em><big>)</big><a class="headerlink" href="#pyKairosDB.connection.KairosDBConnection.read_relative" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>metric_names_list</strong> (<em>list</em>) &#8211; list of metric names to be queried</li>
+<li><strong>start_time</strong> (<em>list</em>) &#8211; The start time for this read request as a pair of values.  The first element
+is a number, the second element is a string specifying the unit of time, e.g. &#8220;days&#8221;, &#8220;seconds&#8221;, &#8220;hours&#8221;, etc.</li>
+<li><strong>end_time</strong> (<em>list</em>) &#8211; The end time for this read request as a pair of values.  The first element
+is a number, the second element is a string specifying the unit of time, e.g. &#8220;days&#8221;, &#8220;seconds&#8221;, &#8220;hours&#8221;, etc.</li>
+<li><strong>query_modifying_function</strong> (<em>function</em>) &#8211; A function that accepts one argument: the query being created.  It can be used
+to arbitrarily modify the contents of the request.  Intended for applying modifications to aggregators and
+grouping and caching when appropriate values for these are discovered.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">requests.response</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a requests.response object with the results of the write</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Read values for the requested metrics using a relative start time, and optionally a relative end time (or don&#8217;t use
+an end time, which means &#8220;now&#8221;)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyKairosDB.connection.KairosDBConnection.write_metrics">
+<tt class="descname">write_metrics</tt><big>(</big><em>metric_list</em><big>)</big><a class="headerlink" href="#pyKairosDB.connection.KairosDBConnection.write_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tags</strong> (<em>list</em>) &#8211; list of dictionaries of metrics, including name, timestamp, value, and tags to be written</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">requests.response</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a requests.response object with the results of the write</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyKairosDB.connection.KairosDBConnection.write_one_metric">
+<tt class="descname">write_one_metric</tt><big>(</big><em>name</em>, <em>timestamp</em>, <em>value</em>, <em>tags</em><big>)</big><a class="headerlink" href="#pyKairosDB.connection.KairosDBConnection.write_one_metric" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; the name of the metric being written</li>
+<li><strong>timestamp</strong> (<em>float</em>) &#8211; the number of seconds since the epoch, as a float.  Per the return value of time.time()</li>
+<li><strong>value</strong> (<em>float</em>) &#8211; The value of the metric to be recorded</li>
+<li><strong>tags</strong> (<em>dict</em>) &#8211; A dictionary of key : value strings that are the tags that will be recorded with this metric.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">requests.response</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a requests.response object with the results of the write</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>This is the API for writing a single metric, making it
+easier in simple cases.  This method is inefficient for large
+batches, and write_metrics() should be used instead in these cases.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyKairosDB.graphite">
+<span id="graphite-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">graphite</span></tt> Module<a class="headerlink" href="#module-pyKairosDB.graphite" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyKairosDB.graphite.expand_graphite_wildcard_metric_name">
+<tt class="descclassname">pyKairosDB.graphite.</tt><tt class="descname">expand_graphite_wildcard_metric_name</tt><big>(</big><em>conn</em>, <em>name</em>, <em>cache_ttl=60</em><big>)</big><a class="headerlink" href="#pyKairosDB.graphite.expand_graphite_wildcard_metric_name" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>conn</strong> (<em>pyKairosDB.KairosDBConnection</em>) &#8211; the connection to the database</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; the graphite-like name which can include &#8221;.*.&#8221; to provide wildcard expansion</li>
+<li><strong>cache_ttl</strong> (<em>int</em>) &#8211; how often to update the cache from KairosDB, in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of unicode strings.  Each unicode string contains an expanded metric name.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>KairosDB doesn&#8217;t currently support wildcards, so get all metric
+names and expand them.</p>
+<p>Currently only &#8221;.*.&#8221; or &#8220;*.&#8221; or &#8221;.*&#8221; expansions are supported.
+Substring expansions aren&#8217;t supported at this time.</p>
+<p>Graphite-web uses fnmatch or something similar, perhaps this
+should provide a list and re-use the same functionality.</p>
+<p>This function caches the created tree for cache_ttl seconds and
+refreshes when the cache has aged beyond the cache_ttl.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.graphite.graphite_metric_list_to_kairosdb_list">
+<tt class="descclassname">pyKairosDB.graphite.</tt><tt class="descname">graphite_metric_list_to_kairosdb_list</tt><big>(</big><em>metric_list</em>, <em>tags</em><big>)</big><a class="headerlink" href="#pyKairosDB.graphite.graphite_metric_list_to_kairosdb_list" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>metric_list</strong> (<em>list</em>) &#8211; A list of lists/tuples, each one being the standard graphite formatting of metrics</li>
+<li><strong>tags</strong> (<em>dict</em>) &#8211; a dict of name: value pairs that will be recorded as tags</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of dicts formatted appropriately for kairosdb</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.graphite.graphite_metric_to_kairosdb">
+<tt class="descclassname">pyKairosDB.graphite.</tt><tt class="descname">graphite_metric_to_kairosdb</tt><big>(</big><em>metric</em>, <em>tags</em><big>)</big><a class="headerlink" href="#pyKairosDB.graphite.graphite_metric_to_kairosdb" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>metric</strong> (<em>tuple</em>) &#8211; tuple of (&#8220;metric_name&#8221;, timestamp, value)</li>
+<li><strong>tags</strong> (<em>dict</em>) &#8211; a dict of {name: value} strings that will be recorded as tags</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">dict</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Re-formatted dict appropriate for kairosdb</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Write graphite metrics to KairosDB.</p>
+<p>Graphite metrics are a tuple with a metric name, a timestamp, and
+a value, and they have a storage schema attached, which specifies
+the time period which should be used for that metric.  This must
+be recorded in the tags for graphite querying to work</p>
+<p>KairosDB metrics are a hash of
+{</p>
+<blockquote>
+<div>&#8220;name&#8221;      : string,
+&#8220;timestamp&#8221; : java long int,
+&#8220;value&#8221;     : float,
+&#8220;tags&#8221;      : { &#8220;name&#8221; : &#8220;value&#8221;, &#8220;name&#8221; : &#8220;value&#8221;}</div></blockquote>
+<p>}</p>
+<p>Even though KairosDB uses a long int, the pythong API here expects
+a float, as returned by time.time().  This module handles
+converting this when the data is written and read, and doesn&#8217;t
+make the user deal with this conversion.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.graphite.leaf_or_branch">
+<tt class="descclassname">pyKairosDB.graphite.</tt><tt class="descname">leaf_or_branch</tt><big>(</big><em>conn</em>, <em>name</em><big>)</big><a class="headerlink" href="#pyKairosDB.graphite.leaf_or_branch" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>conn</strong> (<em>pyKairosDB.KairosDBConnection</em>) &#8211; Connection to the pyrosdb</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; The metric name or part of a name that we&#8217;re checking for</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">str</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Either the string &#8220;leaf&#8221; or &#8220;branch&#8221;</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Graphite wants to know if a name is a &#8220;leaf&#8221; or a &#8220;branch&#8221; in
+its ultimate storage location that is, whether or not it can be
+traversed further</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.graphite.read_absolute">
+<tt class="descclassname">pyKairosDB.graphite.</tt><tt class="descname">read_absolute</tt><big>(</big><em>conn</em>, <em>metric_name</em>, <em>start_time</em>, <em>end_time</em><big>)</big><a class="headerlink" href="#pyKairosDB.graphite.read_absolute" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>conn</strong> (<em>pyKairosDB.KairosDBConnection</em>) &#8211; The connection to KairosDB</li>
+<li><strong>metric_name</strong> (<em>string</em>) &#8211; The name of the metric to query (graphite does one at a time, though KairosDB can do more)</li>
+<li><strong>start_time</strong> (<em>float</em>) &#8211; The float representing the number of seconds since the epoch that this query starts at.</li>
+<li><strong>end_time</strong> (<em>float</em>) &#8211; The float representing the number of seconds since the epoch that this query endsa at.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tuple</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">2-element tuple - ((start_time, end_time, interval), list_of_metric_values).  Graphite wants evenly-spaced metrics,
+and None for any interval that doesn&#8217;t have data.  It infers the time for each update by the order and place of each
+value provided.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>This function returns the values being queried, in the format that the graphite-web app requires.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyKairosDB.metadata">
+<span id="metadata-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">metadata</span></tt> Module<a class="headerlink" href="#module-pyKairosDB.metadata" title="Permalink to this headline">¶</a></h2>
+<p>Functions for getting metadata from the server</p>
+<dl class="function">
+<dt id="pyKairosDB.metadata.get_all_metric_names">
+<tt class="descclassname">pyKairosDB.metadata.</tt><tt class="descname">get_all_metric_names</tt><big>(</big><em>conn</em><big>)</big><a class="headerlink" href="#pyKairosDB.metadata.get_all_metric_names" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>conn</strong> (<em>KairosDBConnection</em>) &#8211; a connection object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list containing the strings of all of the metric names that the server has recorded.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.metadata.get_server_version">
+<tt class="descclassname">pyKairosDB.metadata.</tt><tt class="descname">get_server_version</tt><big>(</big><em>conn</em><big>)</big><a class="headerlink" href="#pyKairosDB.metadata.get_server_version" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>conn</strong> (<em>KairosDBConnection</em>) &#8211; a connection object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">String containing the version of the KairosDB server.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyKairosDB.reader">
+<span id="reader-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">reader</span></tt> Module<a class="headerlink" href="#module-pyKairosDB.reader" title="Permalink to this headline">¶</a></h2>
+<p>Per <a class="reference external" href="https://code.google.com/p/kairosdb/wiki/QueryingData">https://code.google.com/p/kairosdb/wiki/QueryingData</a></p>
+<p>format for an absolute start time:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;start_absolute&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+  <span class="s">&quot;metrics&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;archive.file.tracked&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>format for a relative start time:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;start_relative&quot;</span><span class="p">:{</span><span class="s">&quot;value&quot;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span><span class="s">&quot;unit&quot;</span><span class="p">:</span><span class="s">&quot;weeks&quot;</span><span class="p">},</span>
+  <span class="s">&quot;metrics&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;archive.file.tracked&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>And per the docs, end_absolute and end_relative can be specified &#8220;in the same way&#8221;.</p>
+<dl class="function">
+<dt id="pyKairosDB.reader.aggregation">
+<tt class="descclassname">pyKairosDB.reader.</tt><tt class="descname">aggregation</tt><big>(</big><em>aggregation_list</em>, <em>query_dict_item</em><big>)</big><a class="headerlink" href="#pyKairosDB.reader.aggregation" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>aggregation_list</strong> (<em>list</em>) &#8211; A list of aggregation clauses.</li>
+<li><strong>query_dict_item</strong> (<em>dict</em>) &#8211; An item from the list of items that are being queried.
+The aggregation will be specified for this item, only</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>For example the aggregation clause within the following possible
+aggregation_list:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span> <span class="p">{</span>
+    <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;avg&quot;</span><span class="p">,</span>
+    <span class="s">&quot;sampling&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s">&quot;value&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+      <span class="s">&quot;unit&quot;</span><span class="p">:</span> <span class="s">&quot;minutes&quot;</span>
+     <span class="p">}</span>
+ <span class="p">}</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>would be put in the &#8220;aggregators&#8221; clause.  Combining this with a minutes group-by gives us datasets that graphite will like.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.reader.cache_time">
+<tt class="descclassname">pyKairosDB.reader.</tt><tt class="descname">cache_time</tt><big>(</big><em>cache_time</em>, <em>query_dict</em><big>)</big><a class="headerlink" href="#pyKairosDB.reader.cache_time" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cache_time</strong> (<em>int</em>) &#8211; If desired, the number of seconds for kairos to save the query for re-use</li>
+<li><strong>query_dict</strong> (<em>dict</em>) &#8211; A dictionary describing the entire query. The requested caching is scoped to the entire query.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>This allows for a query to be run, the results cached on the KairosDB server, and the same query to be run again and
+the results from the prior query will be fetched from cache on-disk instead of from the backend database.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.reader.default_aggregator">
+<tt class="descclassname">pyKairosDB.reader.</tt><tt class="descname">default_aggregator</tt><big>(</big><big>)</big><a class="headerlink" href="#pyKairosDB.reader.default_aggregator" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a dictionary containing the appropriate keys and values for a KairosDB aggregation
+clause. It can be modified and be included in a query_modifying_function to modify the
+aggregation behavior of a query.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a dict that will have an aggregator that can be modified</p>
+<p>The default aggegator is this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;avg&quot;</span><span class="p">,</span>
+  <span class="s">&quot;sampling&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s">&quot;value&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+    <span class="s">&quot;unit&quot;</span><span class="p">:</span> <span class="s">&quot;minutes&quot;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.reader.default_group_by">
+<tt class="descclassname">pyKairosDB.reader.</tt><tt class="descname">default_group_by</tt><big>(</big><big>)</big><a class="headerlink" href="#pyKairosDB.reader.default_group_by" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a dictionary containing the appropriate keys and values for a KairosDB group_by.
+It can be modified and be included in a query_modifying_function to modify the group_by
+behavior of a query.</td>
+</tr>
+</tbody>
+</table>
+<p>The default group_by looks like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;time&quot;</span><span class="p">,</span>
+  <span class="s">&quot;group_count&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+  <span class="s">&quot;range_size&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s">&quot;value&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+    <span class="s">&quot;unit&quot;</span><span class="p">:</span> <span class="s">&quot;minutes&quot;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.reader.group_by">
+<tt class="descclassname">pyKairosDB.reader.</tt><tt class="descname">group_by</tt><big>(</big><em>group_by_list</em>, <em>query_dict_item</em><big>)</big><a class="headerlink" href="#pyKairosDB.reader.group_by" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>group_by_list</strong> (<em>list</em>) &#8211; a list of group-by clauses</td>
+</tr>
+</tbody>
+</table>
+<p>This list:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span> <span class="p">{</span>
+    <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;time&quot;</span><span class="p">,</span>
+    <span class="s">&quot;group_count&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+    <span class="s">&quot;range_size&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s">&quot;value&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+      <span class="s">&quot;unit&quot;</span><span class="p">:</span> <span class="s">&quot;minutes&quot;</span>
+    <span class="p">}</span>
+ <span class="p">}</span> <span class="p">],</span>
+</pre></div>
+</div>
+<p>should result in grouping/bucketing of values that would be
+friendly for a graphite data series that used a reporting period
+of a minute (along with aggreagtion on the minute).</p>
+<p>This will add the appropriate group_by clauses to the query_dict_item
+provided.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.reader.read">
+<tt class="descclassname">pyKairosDB.reader.</tt><tt class="descname">read</tt><big>(</big><em>conn</em>, <em>metric_names</em>, <em>start_absolute=None</em>, <em>start_relative=None</em>, <em>end_absolute=None</em>, <em>end_relative=None</em>, <em>query_modifying_function=None</em><big>)</big><a class="headerlink" href="#pyKairosDB.reader.read" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>conn</strong> (<em>pyKairosDB.connect object</em>) &#8211; the interface to the requests library</li>
+<li><strong>metric_names</strong> (<em>list</em>) &#8211; A list of names that will be retrieved.</li>
+<li><strong>start_absolute</strong> (<em>float</em>) &#8211; This is the absolute start time (unix time since the epoch) for the batch of metrics being retrieved.</li>
+<li><strong>start_relative</strong> (<em>tuple</em>) &#8211; <dl class="docutils">
+<dt>a tuple of (int or float) and a string.</dt>
+<dd>The (int or float) contains the quantity of the time units that will be retrieved.
+The string is the unit, containing &#8220;seconds&#8221;, &#8220;minutes&#8221;,</dd>
+</dl>
+<p>&#8220;hours&#8221;, &#8220;days&#8221;, &#8220;weeks&#8221;, &#8220;months&#8221;, or &#8220;years&#8221;.</p>
+</li>
+<li><strong>end_absolute</strong> (<em>float</em>) &#8211; This is the absolute start time (unix time since the epoch) for the batch of metrics being retrieved.</li>
+<li><strong>end_relative</strong> (<em>tuple</em>) &#8211; <dl class="docutils">
+<dt>a tuple of (int or float) and a string.</dt>
+<dd>The (int or float) contains the quantity of the time units that will be retrieved.
+The string is the unit, containing &#8220;seconds&#8221;, &#8220;minutes&#8221;,</dd>
+</dl>
+<p>&#8220;hours&#8221;, &#8220;days&#8221;, &#8220;weeks&#8221;, &#8220;months&#8221;, or &#8220;years&#8221;.</p>
+</li>
+<li><strong>query_modifying_function</strong> (<em>callable</em>) &#8211; A function that will be given the query, and will modify it as needed.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">dict</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a dictionary that reflects the json returned from the kairosdb, with timestamps changed to seconds
+since the epoch (from KairosDBs native milliseconds since the epoch).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.reader.read_absolute">
+<tt class="descclassname">pyKairosDB.reader.</tt><tt class="descname">read_absolute</tt><big>(</big><em>conn</em>, <em>metric_names</em>, <em>start</em>, <em>end=None</em>, <em>tags=None</em>, <em>query_modifying_function=None</em><big>)</big><a class="headerlink" href="#pyKairosDB.reader.read_absolute" title="Permalink to this definition">¶</a></dt>
+<dd><p>If end_absolute is empty, time.time() is implied</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.reader.read_relative">
+<tt class="descclassname">pyKairosDB.reader.</tt><tt class="descname">read_relative</tt><big>(</big><em>conn</em>, <em>metric_names</em>, <em>start</em>, <em>end=None</em>, <em>tags=None</em>, <em>query_modifying_function=None</em><big>)</big><a class="headerlink" href="#pyKairosDB.reader.read_relative" title="Permalink to this definition">¶</a></dt>
+<dd><p>If end_relative is empty, &#8220;now&#8221; is implied</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyKairosDB.util">
+<span id="util-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">util</span></tt> Module<a class="headerlink" href="#module-pyKairosDB.util" title="Permalink to this headline">¶</a></h2>
+<p>This module contains ease-of-use functions</p>
+<dl class="function">
+<dt id="pyKairosDB.util.content_by_name_substring">
+<tt class="descclassname">pyKairosDB.util.</tt><tt class="descname">content_by_name_substring</tt><big>(</big><em>content</em>, <em>name</em><big>)</big><a class="headerlink" href="#pyKairosDB.util.content_by_name_substring" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>content</strong> (<em>dict</em>) &#8211; The python dict form of the content that has been returned from a query to KairosDB</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; This is the string that will be used to match, as a lowercase substring, the things that we want to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The list of pairs of [timestamp, value] that matched</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>When you&#8217;ve got content, but only want to look at a piece of it,
+specifically the values that are provided for a particular name, then use
+this function.</p>
+<p>and this will be turned into a python struct.  This function will
+return a list of dicts that matched the provided name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.util.get_content_values_by_name">
+<tt class="descclassname">pyKairosDB.util.</tt><tt class="descname">get_content_values_by_name</tt><big>(</big><em>content</em>, <em>name</em><big>)</big><a class="headerlink" href="#pyKairosDB.util.get_content_values_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>content</strong> (<em>dict</em>) &#8211; A dictionary as returned by KairosDB with timestamps converted to seconds since the epoch</li>
+<li><strong>name</strong> (<em>str</em>) &#8211; The name of the entry in the results whose values will be returned</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of resulting [timestamp, value] pairs</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>When you&#8217;ve got content, but only want to look at a piece of it,
+specifically the values that are provided for a particular name, then use
+this function.</p>
+<p>return the dict(s) whose name matches the argument &#8220;name&#8221;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.util.get_matching_tag_values">
+<tt class="descclassname">pyKairosDB.util.</tt><tt class="descname">get_matching_tag_values</tt><big>(</big><em>content</em>, <em>tag_key</em>, <em>tag_value_list</em><big>)</big><a class="headerlink" href="#pyKairosDB.util.get_matching_tag_values" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>content</strong> (<em>dict</em>) &#8211; The python dict form of the content that has been returned from a query to KairosDB</li>
+<li><strong>tag_key</strong> (<em>list</em>) &#8211; This will index the tag that we&#8217;re interested in</li>
+<li><strong>tag_value_list</strong> (<em>list</em>) &#8211; list of strings, each of which is a possible tag</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of result dicts that matched</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>When you&#8217;ve got content, but only want to look at a piece of
+it, specifically the values that are provided which match one more
+tag key and some number of tag values, then use this function.</p>
+<p>In short, this tells you whether a tags key and value are in a
+response.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.util.get_matching_tags_from_result">
+<tt class="descclassname">pyKairosDB.util.</tt><tt class="descname">get_matching_tags_from_result</tt><big>(</big><em>result</em>, <em>tag_key</em><big>)</big><a class="headerlink" href="#pyKairosDB.util.get_matching_tags_from_result" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>result</strong> (<em>dict</em>) &#8211; The python dict form of one value as returned in the result content</li>
+<li><strong>tag_key_ist</strong> &#8211; This is a list of indexes of the tags that we&#8217;re interested in</li>
+<li><strong>tag_value_list</strong> (<em>list</em>) &#8211; list of strings, each of which is a possible tag</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of tag values (strings) that matched</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>When you&#8217;ve got content, but only want to look at a piece of
+it, specifically the values that are provided which match one more
+tag key and some number of tag values, then use this function.</p>
+<p>This gets the tag and returns its tag values.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.util.metric_name_wildcard_expansion">
+<tt class="descclassname">pyKairosDB.util.</tt><tt class="descname">metric_name_wildcard_expansion</tt><big>(</big><em>cache_tree</em>, <em>name_list</em>, <em>wildcard_char='*'</em><big>)</big><a class="headerlink" href="#pyKairosDB.util.metric_name_wildcard_expansion" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cache_tree</strong> &#8211; defaultdict</li>
+<li><strong>name_list</strong> &#8211; list</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Description cache_tree:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">a defaultdict initialized with the tree() function</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Description name_list:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">a list of strings created by splitting a name around e.g. &#8221;.&#8221; boundaries (per graphite)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of lists.  Each sub-list is the split-out metric names.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Given some metrics, break up the list around wildcard entries and
+return all those that match.</p>
+<p>This only supports wildcards that are standalone - e.g. I don&#8217;t
+know whether or not the web ui expects &#8220;foo.* and foo.a* to both
+work (the former I know works, the latter, well...?) but this will
+only deal with an * surrounded by a wildcard.</p>
+<p>This only returns the prefixes implied by the <a href="#id2"><span class="problematic" id="id3">*</span></a>.   E.g. for the list:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>and the tree:</p>
+<div class="highlight-python"><pre>{
+  'a' : {
+    'b' : {
+      '1' : {},
+      'c' : {},
+      'd' : {
+        {
+          'a': {},
+          'b': {},
+          'c': {}
+        }
+      }
+    }
+  }
+}</pre>
+</div>
+<p>applying the name_list &#8220;a.b.d.*&#8221; to the cache_tree will return:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[[</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">]],</span> <span class="p">[[</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">]],</span> <span class="p">[[</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.util.tree">
+<tt class="descclassname">pyKairosDB.util.</tt><tt class="descname">tree</tt><big>(</big><big>)</big><a class="headerlink" href="#pyKairosDB.util.tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will create a tree of defaultdicts... of trees.  This is a
+nice hack, and auto-vivifies the necessary dicts.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyKairosDB.writer">
+<span id="writer-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">writer</span></tt> Module<a class="headerlink" href="#module-pyKairosDB.writer" title="Permalink to this headline">¶</a></h2>
+<p>KairosDB expects a list of objects per this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span>
+    <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;archive.file.tracked&quot;</span><span class="p">,</span>
+    <span class="s">&quot;timestamp&quot;</span><span class="p">:</span> <span class="mi">1349109376</span><span class="p">,</span>
+    <span class="s">&quot;value&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+    <span class="s">&quot;tags&quot;</span><span class="p">:{</span><span class="s">&quot;host&quot;</span><span class="p">:</span><span class="s">&quot;test&quot;</span><span class="p">}</span>
+<span class="p">},</span>
+<span class="p">{</span>
+    <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;archive.file.search&quot;</span><span class="p">,</span>
+    <span class="s">&quot;timestamp&quot;</span><span class="p">:</span> <span class="mi">999</span><span class="p">,</span>
+    <span class="s">&quot;value&quot;</span><span class="p">:</span> <span class="mi">321</span><span class="p">,</span>
+    <span class="s">&quot;tags&quot;</span><span class="p">:{</span><span class="s">&quot;host&quot;</span><span class="p">:</span><span class="s">&quot;test&quot;</span><span class="p">}</span>
+<span class="p">}]</span>
+</pre></div>
+</div>
+<p>The documentation for this is at <a class="reference external" href="https://code.google.com/p/kairosdb/wiki/PushingData">https://code.google.com/p/kairosdb/wiki/PushingData</a></p>
+<p>We send this via the reuests object that the KairosDBConnection presents.</p>
+<dl class="function">
+<dt id="pyKairosDB.writer.write_metrics_list">
+<tt class="descclassname">pyKairosDB.writer.</tt><tt class="descname">write_metrics_list</tt><big>(</big><em>conn</em>, <em>metric_list</em><big>)</big><a class="headerlink" href="#pyKairosDB.writer.write_metrics_list" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>conn</strong> (<em>KairosDBConnection</em>) &#8211; The interface to the requests library</li>
+<li><strong>metrics_list</strong> (<em>list</em>) &#8211; list of dicts, each dict is a metric that will be sent to KairosDB</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">request.response</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a requests.response object with the results of the write</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Takes a list of formatted metrics hashes and writes them to the
+api.  This takes each timestamp, which should be a regular python
+time.time() in seconds since the epoch, and multiplies it by 1000,
+and posts the int version (no decimal)  to agree with what kairosdb
+expects.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyKairosDB.writer.write_one_metric">
+<tt class="descclassname">pyKairosDB.writer.</tt><tt class="descname">write_one_metric</tt><big>(</big><em>conn</em>, <em>name</em>, <em>timestamp</em>, <em>value</em>, <em>tags</em><big>)</big><a class="headerlink" href="#pyKairosDB.writer.write_one_metric" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>conn</strong> (<em>KairosDBConnection</em>) &#8211; the interface to the requests library</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; The name of the metric to be sent</li>
+<li><strong>timestamp</strong> (<em>float</em>) &#8211; the unix-style timestamp (to a microsecond resolution) that will be sent for this metric</li>
+<li><strong>value</strong> (<em>float</em>) &#8211; The value that will be sent along for this metric</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">request.response</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a requests.response object with the results of the write</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>construct a single metric and send it to kairosdb.  Does some duck-type checking on the tags.
+At least one tag must be present or kairosdb will not store the metric.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyKairosDB Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">pyKairosDB</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-pyKairosDB.connection"><tt class="docutils literal"><span class="pre">connection</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-pyKairosDB.graphite"><tt class="docutils literal"><span class="pre">graphite</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-pyKairosDB.metadata"><tt class="docutils literal"><span class="pre">metadata</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-pyKairosDB.reader"><tt class="docutils literal"><span class="pre">reader</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-pyKairosDB.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-pyKairosDB.writer"><tt class="docutils literal"><span class="pre">writer</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pyKairosDB.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">pyKairosDB 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Peter C. Norton.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
