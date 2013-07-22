@@ -18,7 +18,7 @@ SECONDS_PER_YEAR   = SECONDS_PER_DAY    * 365
 
 # how graphite will access kairosdb
 def graphite_metric_list_to_kairosdb_list(metric_list, tags):
-    """Doesn't handle tags yet
+    """
     :type metric_list: list
     :param metric_list: A list of lists/tuples, each one being the standard graphite formatting of metrics
 
@@ -32,28 +32,30 @@ def graphite_metric_list_to_kairosdb_list(metric_list, tags):
 
 
 def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
-    """KairosDB doesn't currently support wildcards, so get all metric
-    names and expand them.
-
-    Currently only ".*." or "*." or ".*" expansions are supported.
-    Substring expansions aren't supported at this time.
-
-    XXX should they be?  Check in graphite-web's finders.py
-    XXX they do it in a simpler way, with fnmatch.
-
-    Cache the created tree for cache_ttl seconds and refresh when the cache has aged.
-
-    :type conn: pyKairosDBConnection
+    """
+    :type conn: pyKairosDB.KairosDBConnection
     :param conn: the connection to the database
 
     :type name: string
     :param name: the graphite-like name which can include ".*." to provide wildcard expansion
 
     :type cache_ttl: int
-    :param cache_ttl: how often to update from the cache in KairosDB, in seconds
+    :param cache_ttl: how often to update the cache from KairosDB, in seconds
 
     :rtype: list
-    :return: a list of unicode strings.  Each unicode string contains an expanded metric name
+    :return: a list of unicode strings.  Each unicode string contains an expanded metric name.
+
+    KairosDB doesn't currently support wildcards, so get all metric
+    names and expand them.
+
+    Currently only ".*." or "\*." or ".\*" expansions are supported.
+    Substring expansions aren't supported at this time.
+
+    Graphite-web uses fnmatch or something similar, perhaps this
+    should provide a list and re-use the same functionality.
+
+    This function caches the created tree for cache_ttl seconds and
+    refreshes when the cache has aged beyond the cache_ttl.
     """
 
     if "*" not in name:
@@ -78,17 +80,19 @@ expand_graphite_wildcard_metric_name.cache_timestamp = 0
 
 
 def leaf_or_branch(conn, name):
-    """Graphite wants to know if a name is a "leaf" or a "branch" -
-    that is, whether or not it can be traversed further
-
-    :type conn: pyKairosDB.connection
+    """
+    :type conn: pyKairosDB.KairosDBConnection
     :param conn: Connection to the pyrosdb
 
     :type name: string
     :param name: The metric name or part of a name that we're checking for
 
-    :rtype str:
-    :return: Returns either "leaf" or "branch"
+    :rtype: str
+    :return: Either the string "leaf" or "branch"
+
+    Graphite wants to know if a name is a "leaf" or a "branch" in
+    its ultimate storage location that is, whether or not it can be
+    traversed further
     """
     wildcard_expansion = expand_graphite_wildcard_metric_name(conn, name + ".*")
     if len(wildcard_expansion) > 0:
@@ -98,24 +102,36 @@ def leaf_or_branch(conn, name):
 
 
 def _make_graphite_name_cache(cache_tree, list_of_names):
-    """Given a list of names - all name - that kairosdb has, make a
-    tree of all those names.
-
-    :type cache_tree: defaultdict
+    """    :type cache_tree: defaultdict
     :param cache_tree: a defaultdict initialized with the tree() function.  Contains names
-                             of entries in the kairosdb, separated by "." per the graphite convention.
+        of entries in the kairosdb, separated by "." per the graphite convention.
 
     :type list_of_names: list
     :param list_of_names: list of strings, in order, that will be sought after in the cache tree.
+
+    Given a list of names - all name - that kairosdb has, make a
+    tree of all those names.
     """
     for n in list_of_names:
         util._add_to_cache(cache_tree, n.split('.'))
 
 def graphite_metric_to_kairosdb(metric, tags):
-    """For writing graphite metrics to KairosDB.
-    Graphite metrics are a tuple with a metric name, a timestamp, and a value.
+    """
+    :type metric: tuple
+    :param metric: tuple of ("metric_name", timestamp, value)
 
-    Tags are used to record the storage-schema in use
+    :type tags: dict
+    :param tags: a dict of {name: value} strings that will be recorded as tags
+
+    :rtype: dict
+    :return: Re-formatted dict appropriate for kairosdb
+
+    Write graphite metrics to KairosDB.
+
+    Graphite metrics are a tuple with a metric name, a timestamp, and
+    a value, and they have a storage schema attached, which specifies
+    the time period which should be used for that metric.  This must
+    be recorded in the tags for graphite querying to work
 
     KairosDB metrics are a hash of
     {
@@ -125,17 +141,12 @@ def graphite_metric_to_kairosdb(metric, tags):
      "tags"      : { "name" : "value", "name" : "value"}
     }
 
-    However, the value we supply will be a python float, and that'll
-    be handled when the data is written.
 
-    :type metric: tuple
-    :param metric: tuple per the standard graphite formatting of metrics
+    Even though KairosDB uses a long int, the pythong API here expects
+    a float, as returned by time.time().  This module handles
+    converting this when the data is written and read, and doesn't
+    make the user deal with this conversion.
 
-    :type tags: dict
-    :param tags: a dict of name: value pairs that will be recorded as tags
-
-    :rtype: dict
-    :return: Re-formatted dict appropriate for kairosdb
     """
     return {
         "name"      : metric[0],
@@ -145,22 +156,36 @@ def graphite_metric_to_kairosdb(metric, tags):
     }
 
 def _lowest_resolution_retention(data, name):
-    """Graphite needs data to be divided into even time slices.  We
+    """
+    :type data: requests.response.content
+    :param data: Content from the KairosDB query
+
+    :type name: str
+    :param name: The name of the metric whose retention will be extracted.
+
+    :rtype: int
+    :return: The number of seconds in the lowest-resolution retention period in the data
+
+    Graphite needs data to be divided into even time slices.  We
     must store the slice information when writing data so that it can
     be read out here.
 
     The relevant tags are in the README.md for this project.
     """
     def seconds_from_retention_tag(tag_value):
-        """A tag is a colon-separated resolution:retention period.
+        """
+        :type tag_value: str
+        :param tag_value: the retention info tag
+
+        :rtype: int
+        :return: Number of seconds for the given tag value
+
+        A tag is a colon-separated resolution:retention period.
         We're not worried about the retention period, we just care
         about the resolution of the data.
 
         So get the first part of it, and expand the number of seconds
         so we can make a valid comparison.
-
-        :type tag_value: str
-        :param tag_value: the retention info tag
         """
         resolution, _ = tag_value.split(":")
         # It'd be nice to have a case statement here
@@ -186,13 +211,11 @@ def _lowest_resolution_retention(data, name):
 
 def read_absolute(conn, metric_name, start_time, end_time):
     """
-    This function returns the values that the graphite-web app wants to have
-
-    :type conn: pyKairosDB.connection
-    :param conn: pyKairosDB connection object
+    :type conn: pyKairosDB.KairosDBConnection
+    :param conn: The connection to KairosDB
 
     :type metric_name: string
-    :param metric_name: The name of the metric to query (graphite does one at a time)
+    :param metric_name: The name of the metric to query (graphite does one at a time, though KairosDB can do more)
 
     :type start_time: float
     :param start_time: The float representing the number of seconds since the epoch that this query starts at.
@@ -200,6 +223,12 @@ def read_absolute(conn, metric_name, start_time, end_time):
     :type end_time: float
     :param end_time: The float representing the number of seconds since the epoch that this query endsa at.
 
+    :rtype: tuple
+    :return: 2-element tuple - ((start_time, end_time, interval), list_of_metric_values).  Graphite wants evenly-spaced metrics,
+        and None for any interval that doesn't have data.  It infers the time for each update by the order and place of each
+        value provided.
+
+    This function returns the values being queried, in the format that the graphite-web app requires.
     """
     def cache_query():
         def cache_query_closure(query_dict):
@@ -213,8 +242,8 @@ def read_absolute(conn, metric_name, start_time, end_time):
             group_by["range_size"] = { "value" : interval_seconds, "unit" : "seconds"}
             aggregator = reader.default_aggregator()
             aggregator["sampling"] = group_by["range_size"]
-            reader.group_by([group_by], metric_name, query_dict)
-            reader.aggregation([aggregator], metric_name, query_dict)
+            reader.group_by([group_by], query_dict["metrics"][0])
+            reader.aggregation([aggregator], query_dict["metrics"][0])
         return modify_query_closure
     # re-fetch now that we've gotten the content and set the retention time.
     content = conn.read_absolute([metric_name], start_time, end_time,

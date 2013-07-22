@@ -10,48 +10,31 @@ from . import metadata as metadata
 
 # Nice hack: https://gist.github.com/hrldcpr/2012250
 def tree():
-  """This will create a tree of defaultdicts... of trees.  This is a
+  """
+  This will create a tree of defaultdicts... of trees.  This is a
   nice hack, and auto-vivifies the necessary dicts.
   """
   return defaultdict(tree)
 
 def get_content_values_by_name(content, name):
-    """When you've got content, but only want to look at a piece of it,
+    """
+    :type content: dict
+    :param content: A dictionary as returned by KairosDB with timestamps converted to seconds since the epoch
+
+    :type name: str
+    :param name: The name of the entry in the results whose values will be returned
+
+    :rtype: list
+    :return: a list of resulting [timestamp, value] pairs
+
+    When you've got content, but only want to look at a piece of it,
     specifically the values that are provided for a particular name, then use
     this function.
 
-    Content will look like this when it comes back as json:
-        "{\"queries\":
-       [
-         {\"results\":
-           [
-             {\"name\":\"test\",
-              \"tags\":
-                {\"graphite\":[\"yes\"]},
-              \"values\":[
-                [1373780448859,1.373780448859967E9],
-                [1373780450816,1.373780450816504E9],
-                [1373781047785,1.373781047785849E9],
-                [1373781261751,1.373781261751651E9],
-                [1373781264045,1.37378126404582E9],
-                [1373781265456,1.373781265456353E9]
-              ]
-            }
-          ]
-        }
-      ]
-    }"
-
-    and this will be turned into a python struct.  This function will
     return the dict(s) whose name matches the argument "name"
 
-    :rtype: list
-    :return: a list of results
     """
     r_list = list()
-    # print
-    # print content
-    # print
     for q in content["queries"]:
         for r in q["results"]:
             if r["name"] == name:
@@ -59,18 +42,22 @@ def get_content_values_by_name(content, name):
     return r_list
 
 def content_by_name_substring(content, name):
-    """When you've got content, but only want to look at a piece of it,
-    specifically the values that are provided for a particular name, then use
-    this function.
-
-    and this will be turned into a python struct.  This function will
-    return a list of dicts that matched the provided name.
-
+    """
     :type content: dict
     :param content: The python dict form of the content that has been returned from a query to KairosDB
 
     :type name: string
     :param name: This is the string that will be used to match, as a lowercase substring, the things that we want to return.
+
+    :rtype: list
+    :returns: The list of pairs of [timestamp, value] that matched
+
+    When you've got content, but only want to look at a piece of it,
+    specifically the values that are provided for a particular name, then use
+    this function.
+
+    and this will be turned into a python struct.  This function will
+    return a list of dicts that matched the provided name.
 
     """
     r_list = list()
@@ -82,13 +69,7 @@ def content_by_name_substring(content, name):
 
 
 def get_matching_tag_values(content, tag_key, tag_value_list):
-    """When you've got content, but only want to look at a piece of
-    it, specifically the values that are provided which match one more
-    tag key and some number of tag values, then use this function.
-
-    In short, this tells you whether a tags key and value are in a
-    response.
-
+    """
     :type content: dict
     :param content: The python dict form of the content that has been returned from a query to KairosDB
 
@@ -100,6 +81,13 @@ def get_matching_tag_values(content, tag_key, tag_value_list):
 
     :rtype: list
     :return: a list of result dicts that matched
+
+    When you've got content, but only want to look at a piece of
+    it, specifically the values that are provided which match one more
+    tag key and some number of tag values, then use this function.
+
+    In short, this tells you whether a tags key and value are in a
+    response.
     """
     r_list = list()
     tag_value_set = frozenset([tv.lower() for tv in tag_value_list])
@@ -115,12 +103,7 @@ def get_matching_tag_values(content, tag_key, tag_value_list):
     return r_list
 
 def get_matching_tags_from_result(result, tag_key):
-    """When you've got content, but only want to look at a piece of
-    it, specifically the values that are provided which match one more
-    tag key and some number of tag values, then use this function.
-
-    This gets the tag and returns its tag values.
-
+    """
     :type result: dict
     :param result: The python dict form of one value as returned in the result content
 
@@ -131,8 +114,13 @@ def get_matching_tags_from_result(result, tag_key):
     :param tag_value_list: list of strings, each of which is a possible tag
 
     :rtype: list
-    :return: a list of result dicts that matched
+    :return: a list of tag values (strings) that matched
 
+    When you've got content, but only want to look at a piece of
+    it, specifically the values that are provided which match one more
+    tag key and some number of tag values, then use this function.
+
+    This gets the tag and returns its tag values.
     """
     r_set = set()
     # print result
@@ -143,14 +131,7 @@ def get_matching_tags_from_result(result, tag_key):
 
 
 def _add_to_cache(cache_tree, list_of_names):
-    """This should probably be done via macropy, I need to understand
-    more about how that'd work first.  I'd like to have macro expansion
-    of "list_of_names", e.g. ['a', 'b', 'c'] to turn into
-    cache_tree['a']['b']['c']
-
-    Cache_tree is a tree of dictionaries, so it will be mutated in
-    place.
-
+    """
     :type cache_tree: defaultdict
     :description cache_tree: a defaultdict initialized with the tree() function.  Contains names
                              of entries in the kairosdb, separated by "." per the graphite convention.
@@ -158,6 +139,14 @@ def _add_to_cache(cache_tree, list_of_names):
 
     :type list_of_names: list
     :description list_of_names: list of strings, in order, that will be sought after in the cache tree.
+
+    This should probably be done via macropy, I need to understand
+    more about how that'd work first.  I'd like to have macro expansion
+    of "list_of_names", e.g. ['a', 'b', 'c'] to turn into
+    cache_tree['a']['b']['c']
+
+    Cache_tree is a tree of dictionaries, so it will be mutated in
+    place.
 
     """
     head_item = list_of_names[0]
@@ -170,8 +159,7 @@ def _add_to_cache(cache_tree, list_of_names):
 
 
 def _match_in_cache(cache_tree, list_of_names):
-    """Given a cache_tree, and a prefix, returns all of the values associated with that prefix,
-    that is, the keys that reside under the prefix.
+    """
     :type cache_tree: defaultdict
     :description cache_tree: a defaultdict initialized with the tree() function.  Contains names
                              of entries in the kairosdb, separated by "." per the graphite convention.
@@ -181,6 +169,9 @@ def _match_in_cache(cache_tree, list_of_names):
 
     :rtype: list
     :return: A list of matches, possibly empty.
+
+    Given a cache_tree, and a prefix, returns all of the values associated with that prefix,
+    that is, the keys that reside under the prefix.
     """
     head_item = list_of_names[0]
     if head_item not in cache_tree.keys():
@@ -195,38 +186,7 @@ def _match_in_cache(cache_tree, list_of_names):
 
 
 def metric_name_wildcard_expansion(cache_tree, name_list, wildcard_char="*"):
-    """Given some metrics, break up the list around wildcard entries and
-    return all those that match.
-
-    This only supports wildcards that are standalone - e.g. I don't
-    know whether or not the web ui expects "foo.* and foo.a* to both
-    work (the former I know works, the latter, well...?) but this will
-    only deal with an * surrounded by a wildcard.
-
-    This only returns the prefixes implied by the *.   E.g. for the list:
-      ['a', 'b', '*']
-
-    and the tree
-    {
-      'a' : {
-        'b' : {
-          '1' : {},
-          'c' : {},
-          'd' : {
-            {
-              'a': {},
-              'b': {},
-              'c': {}
-            }
-          }
-        }
-      }
-    }
-
-    applying the name_list "a.b.d.*" to the cache_tree will return
-    [['a', 'b', 'd', 'a']], [['a', 'b', 'd', 'b']], [['a', 'b', 'd', 'c']]
-
-
+    """
     :param cache_tree: defaultdict
     :description cache_tree: a defaultdict initialized with the tree() function
 
@@ -235,6 +195,41 @@ def metric_name_wildcard_expansion(cache_tree, name_list, wildcard_char="*"):
 
     :rtype: list
     :return: a list of lists.  Each sub-list is the split-out metric names.
+
+    Given some metrics, break up the list around wildcard entries and
+    return all those that match.
+
+    This only supports wildcards that are standalone - e.g. I don't
+    know whether or not the web ui expects "foo.* and foo.a* to both
+    work (the former I know works, the latter, well...?) but this will
+    only deal with an * surrounded by a wildcard.
+
+    This only returns the prefixes implied by the *.   E.g. for the list::
+
+        ['a', 'b', '*']
+
+    and the tree::
+
+        {
+          'a' : {
+            'b' : {
+              '1' : {},
+              'c' : {},
+              'd' : {
+                {
+                  'a': {},
+                  'b': {},
+                  'c': {}
+                }
+              }
+            }
+          }
+        }
+
+    applying the name_list "a.b.d.*" to the cache_tree will return::
+
+        [['a', 'b', 'd', 'a']], [['a', 'b', 'd', 'b']], [['a', 'b', 'd', 'c']]
+
     """
     count = 0
     complete_list = list()

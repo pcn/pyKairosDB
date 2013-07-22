@@ -1,18 +1,21 @@
 # -*- python -*-
 
-"""KairosDB expects a list of objects per this:
-[{
-    "name": "archive.file.tracked",
-    "timestamp": 1349109376,
-    "value": 123,
-    "tags":{"host":"test"}
-},
-{
-    "name": "archive.file.search",
-    "timestamp": 999,
-    "value": 321,
-    "tags":{"host":"test"}
-}]
+"""
+KairosDB expects a list of objects per this::
+
+    [{
+        "name": "archive.file.tracked",
+        "timestamp": 1349109376,
+        "value": 123,
+        "tags":{"host":"test"}
+    },
+    {
+        "name": "archive.file.search",
+        "timestamp": 999,
+        "value": 321,
+        "tags":{"host":"test"}
+    }]
+
 
 The documentation for this is at https://code.google.com/p/kairosdb/wiki/PushingData
 
@@ -26,10 +29,7 @@ import requests
 
 def write_one_metric(conn, name, timestamp, value, tags):
     """
-    construct a single metric and send it to kairosdb.  Does some duck-type checking on the tags.
-    At least one tag must be present or kairosdb will not store the metric.
-
-    :type conn: pyKairosDB.connect object
+    :type conn: KairosDBConnection
     :param conn: the interface to the requests library
 
     :type name: string
@@ -44,6 +44,8 @@ def write_one_metric(conn, name, timestamp, value, tags):
     :rtype: request.response
     :return: a requests.response object with the results of the write
 
+    construct a single metric and send it to kairosdb.  Does some duck-type checking on the tags.
+    At least one tag must be present or kairosdb will not store the metric.
     """
     if 'keys' not in dir(tags):
         raise TypeError, "The tags provided doesn't look enough like a dict: {0} is type {1}".format(tags, type(tags))
@@ -56,13 +58,8 @@ def write_one_metric(conn, name, timestamp, value, tags):
     return write_metrics_list(conn, [metric])
 
 def write_metrics_list(conn, metric_list):
-    """Takes a list of formatted metrics hashes and writes them to the
-    api.  This takes each timestamp, which should be a regular python
-    time.time() in seconds since the epoch, and multiplies it by 1000,
-    and posts the int version (no decimal)  to agree with what kairosdb
-    expects.
-
-    :type conn: pyKairosDB.connect object
+    """
+    :type conn: KairosDBConnection
     :param conn: The interface to the requests library
 
     :type metrics_list: list
@@ -70,6 +67,12 @@ def write_metrics_list(conn, metric_list):
 
     :rtype: request.response
     :return: a requests.response object with the results of the write
+
+    Takes a list of formatted metrics hashes and writes them to the
+    api.  This takes each timestamp, which should be a regular python
+    time.time() in seconds since the epoch, and multiplies it by 1000,
+    and posts the int version (no decimal)  to agree with what kairosdb
+    expects.
     """
     for m in metric_list:
         m["timestamp"] = int(m["timestamp"] * 1000)
