@@ -29,7 +29,7 @@ def _graphite_metric_list_retentions(metric_list, storage_schemas):
         for s in storage_schemas:
             if s.test(metric_name):
                 return _input_retention_resolution(s.options['retentions'].split(','))
-    retentions = [ get_retentions(m[0])[1] for m in metric_list ]
+    retentions = [ get_retentions(m[0])[1].replace(':', '_') for m in metric_list ]
     return retentions
 
 # how graphite will access kairosdb
@@ -74,7 +74,7 @@ def graphite_metric_list_with_retentions_to_kairosdb_list(metric_list, storage_s
         tags = {}
         if len(pervasive_tags) > 0:
             tags.update(pervasive_tags)
-        tags['storage-schemas-retentions'] = r
+        tags[RETENTION_TAG] = r
         yield graphite_metric_to_kairosdb(m, tags=tags)
 
 
@@ -204,23 +204,28 @@ def graphite_metric_to_kairosdb(metric, tags):
     }
 
 
-def seconds_from_retention_tag(tag_value):
-    """
-    :type tag_value: str
+def seconds_from_retention_tag(tag_value, sep=':'):
+    """:type tag_value: str
     :param tag_value: the retention info tag
 
     :rtype: int
     :return: Number of seconds for the given tag value
 
-    A tag is a colon-separated resolution:retention period.
-    We're not worried about the retention period, we just care
-    about the resolution of the data.
+    The retention tag is a colon-separated resolution_retention period
+    when it's input, taken from the carbon storage-schemas.conf.  When
+    reading from kairosdb, the ':' is not a legal character to have in
+    a tag, so we input them with an underscore instead.  That
+    separator is configurable so this can be used on tags that are
+    queried as well.
+
+    For this function we're not worried about the retention period, we
+    just care about the resolution of the data.
 
     So get the first part of it, and expand the number of seconds
     so we can make a valid comparison.
+
     """
-    resolution, _ = tag_value.split(":")
-    # It'd be nice to have a case statement here
+    resolution, _ = tag_value.split(sep)
     if resolution[-1].lower() == "s":
         return int(resolution[:-1])
     elif resolution[-1].lower() == "m":
