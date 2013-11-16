@@ -16,6 +16,22 @@ SECONDS_PER_WEEK   = SECONDS_PER_DAY    * 7
 SECONDS_PER_MONTH  = SECONDS_PER_DAY    * 30 # OK, I'm approximating
 SECONDS_PER_YEAR   = SECONDS_PER_DAY    * 365
 
+def _graphite_metric_list_retentions(metric_list, storage_schemas):
+    """:type metric_list: list
+    :param metric_list: a list of lists/tuples, each one is the standard graphite format of metrics
+
+    :type storage_schemas: list
+    :param storage_schemas: list of carbon.stroage.Schema objects which will be matched against
+                            each of the graphite metrics and used to tag each metric.
+
+    """
+    def get_retentions(metric_name):
+        for s in storage_schemas:
+            if s.test(metric_name):
+                return _input_retention_resolution(s.options['retentions'].split(','))
+    retentions = [ get_retentions(m[0])[1] for m in metric_list ]
+    return retentions
+
 # how graphite will access kairosdb
 def graphite_metric_list_to_kairosdb_list(metric_list, tags):
     """
@@ -27,8 +43,39 @@ def graphite_metric_list_to_kairosdb_list(metric_list, tags):
 
     :rtype: list
     :return: List of dicts formatted appropriately for kairosdb
+
+    Use this for entering a large set of metrics that have the same set of tags (e.g. same retentions, etc.)
     """
     return [graphite_metric_to_kairosdb(m, tags=tags) for m in metric_list]
+
+# how graphite will write lots of points to kairosdb
+def graphite_metric_list_with_retentions_to_kairosdb_list(metric_list, storage_schemas, pervasive_tags={}):
+    """
+    :type metric_list: list
+    :param metric_list: A list of line-formatted lists or tuples, each one being the standard graphite formatting of metrics
+
+    :type storage_schemas: list
+    :param storage_schemas: A list of carbon.storage.Schema objects to be matched against.
+
+    :type pervasive_tags: dict
+    :param pervasive_tags: tags that will be applied to (almost) all metrics. This won't override the
+                           retentions configuration.
+
+    :rtype: generator
+    :return: generator of dicts formatted appropriately for kairosdb
+
+    Use this for entering a large set of metrics that have the disparate retentions.  The expected
+    way to call this from a sender is to first call _graphite_metric_list_retentions()
+
+    XXX this API is getting messy - it should be simpler. -PN
+    """
+    retentions_list = _graphite_metric_list_retentions(metric_list, storage_schemas)
+    for m,r in zip(metric_list, retentions_list):
+        tags = {}
+        if len(pervasive_tags) > 0:
+            tags.update(pervasive_tags)
+        tags['storage-schemas-retentions'] = r
+        yield graphite_metric_to_kairosdb(m, tags=tags)
 
 
 def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
@@ -148,12 +195,63 @@ def graphite_metric_to_kairosdb(metric, tags):
     make the user deal with this conversion.
 
     """
+    print metric
     return {
         "name"      : metric[0],
         "timestamp" : metric[1],
         "value"     : metric[2],
         "tags"      : tags
     }
+
+
+def seconds_from_retention_tag(tag_value):
+    """
+    :type tag_value: str
+    :param tag_value: the retention info tag
+
+    :rtype: int
+    :return: Number of seconds for the given tag value
+
+    A tag is a colon-separated resolution:retention period.
+    We're not worried about the retention period, we just care
+    about the resolution of the data.
+
+    So get the first part of it, and expand the number of seconds
+    so we can make a valid comparison.
+    """
+    resolution, _ = tag_value.split(":")
+    # It'd be nice to have a case statement here
+    if resolution[-1].lower() == "s":
+        return int(resolution[:-1])
+    elif resolution[-1].lower() == "m":
+        return int(resolution[:-1]) * SECONDS_PER_MINUTE
+    elif resolution[-1].lower() == "h":
+        return int(resolution[:-1]) * SECONDS_PER_HOUR
+    elif resolution[-1].lower() == "d":
+        return int(resolution[:-1]) * SECONDS_PER_DAY
+    elif resolution[-1].lower() == "w":
+        return int(resolution[:-1]) * SECONDS_PER_WEEK
+    elif resolution[-1].lower() == "y":
+        return int(resolution[:-1]) * SECONDS_PER_YEAR
+    else: # Seconds is the default
+        return int(resolution)
+
+def _input_retention_resolution(retention_string_list):
+    """
+    :type retention_string_list: list
+    :param retention_string_list: A list of strings containing retention definitions
+
+    :rtype: tuple
+    :return: A tuple containing the (number_of_seconds, highest_resoultion_retention_string),
+             which is an (int, str)
+
+    When inputting data, we want the highest resolution data - the
+    actual metrics can be summarized later based on the same policy or
+    a different one if that works better.
+    """
+    all_tags_set = [t for t in retention_string_list]
+    return min([(seconds_from_retention_tag(tag), tag) for tag in all_tags_set])# return the highest resolution
+
 
 def _lowest_resolution_retention(data, name):
     """
@@ -172,36 +270,6 @@ def _lowest_resolution_retention(data, name):
 
     The relevant tags are in the README.md for this project.
     """
-    def seconds_from_retention_tag(tag_value):
-        """
-        :type tag_value: str
-        :param tag_value: the retention info tag
-
-        :rtype: int
-        :return: Number of seconds for the given tag value
-
-        A tag is a colon-separated resolution:retention period.
-        We're not worried about the retention period, we just care
-        about the resolution of the data.
-
-        So get the first part of it, and expand the number of seconds
-        so we can make a valid comparison.
-        """
-        resolution, _ = tag_value.split(":")
-        # It'd be nice to have a case statement here
-        if resolution[-1].lower() == "s":
-            return int(resolution[:-1])
-        elif resolution[-1].lower() == "m":
-            return int(resolution[:-1]) * SECONDS_PER_MINUTE
-        elif resolution[-1].lower() == "h":
-            return int(resolution[:-1]) * SECONDS_PER_HOUR
-        elif resolution[-1].lower() == "d":
-            return int(resolution[:-1]) * SECONDS_PER_DAY
-        elif resolution[-1].lower() == "w":
-            return int(resolution[:-1]) * SECONDS_PER_WEEK
-        elif resolution[-1].lower() == "y":
-            return int(resolution[:-1]) * SECONDS_PER_YEAR
-
     values = util.get_content_values_by_name(data, name)
     all_tags_set = set() # easiest case - all tags are the same, otherwise we use the set
     for result in values:
