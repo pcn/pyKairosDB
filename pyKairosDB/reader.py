@@ -156,7 +156,8 @@ def cache_time(cache_time, query_dict):
 
 
 def read(conn, metric_names, start_absolute=None, start_relative=None,
-         end_absolute=None, end_relative=None, query_modifying_function=None):
+         end_absolute=None, end_relative=None, query_modifying_function=None,
+         only_read_tags=False):
     """:type conn: pyKairosDB.connect object
     :param conn: the interface to the requests library
 
@@ -183,6 +184,9 @@ def read(conn, metric_names, start_absolute=None, start_relative=None,
     :type query_modifying_function: callable
     :param query_modifying_function: A function that will be given the query, and will modify it as needed.
 
+    :type only_read_tags: boolean
+    :param only_read_tags: A boolean determining whether we are querying tags or metrics
+
     :rtype: dict
     :return: a dictionary that reflects the json returned from the kairosdb, with timestamps changed to seconds
         since the epoch (from KairosDBs native milliseconds since the epoch).
@@ -192,10 +196,15 @@ def read(conn, metric_names, start_absolute=None, start_relative=None,
         query = _query_relative(start_relative, end_relative)
     elif start_absolute is not None:
         query = _query_absolute(start_absolute, end_absolute)
+    if only_read_tags is True:
+        read_url = conn.read_tag_url
+    else:
+        read_url = conn.read_url
+
     query["metrics"] = [ {"name" : m } for m in metric_names ]
     if query_modifying_function is not None:
         query_modifying_function(query)
-    r = requests.post(conn.read_url, json.dumps(query))
+    r = requests.post(read_url, json.dumps(query))
     return _change_timestamps_to_python(r.content)
 
 def _query_relative(start, end=None):
@@ -258,15 +267,19 @@ def _query_absolute(start, end):
     return query
 
 
-def read_relative(conn, metric_names, start, end=None, tags=None, query_modifying_function=None):
+def read_relative(conn, metric_names, start, end=None, tags=None,
+                  query_modifying_function=None, only_read_tags=False):
     """If end_relative is empty, "now" is implied"""
     return read(conn, metric_names, start_relative=start, end_relative=end,
-        query_modifying_function=query_modifying_function)
+                query_modifying_function=query_modifying_function,
+                only_read_tags=only_read_tags)
 
-def read_absolute(conn, metric_names, start, end=None, tags=None, query_modifying_function=None):
+def read_absolute(conn, metric_names, start, end=None, tags=None,
+                  query_modifying_function=None, only_read_tags=False):
     """If end_absolute is empty, time.time() is implied"""
     return read(conn, metric_names, start_absolute=start, end_absolute=end,
-        query_modifying_function=query_modifying_function)
+                query_modifying_function=query_modifying_function,
+                only_read_tags=only_read_tags)
 
 
 def _change_timestamps_to_python(content):

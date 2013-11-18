@@ -307,8 +307,11 @@ def read_absolute(conn, metric_name, start_time, end_time):
         def cache_query_closure(query_dict):
             reader.cache_time(10, query_dict)
         return cache_query_closure
-    content = conn.read_absolute([metric_name], start_time, end_time, query_modifying_function=cache_query())
-    interval_seconds = _lowest_resolution_retention(content, metric_name)
+    tags = conn.read_absolute([metric_name], start_time, end_time,
+                              query_modifying_function=cache_query(),
+                              only_read_tags=True)
+    print tags
+    interval_seconds = _lowest_resolution_retention(tags, metric_name)
     def modify_query():
         def modify_query_closure(query_dict):
             group_by               = reader.default_group_by()
