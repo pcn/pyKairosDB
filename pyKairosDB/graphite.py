@@ -6,15 +6,20 @@ from util import tree
 from . import metadata
 from . import reader
 from collections import deque
+import re
 
 
-RETENTION_TAG = "storage-schema-retentions"
+RETENTION_TAG = "gr-ret" # terse in order to save space on-disk
 SECONDS_PER_MINUTE = 60
 SECONDS_PER_HOUR   = SECONDS_PER_MINUTE * 60
 SECONDS_PER_DAY    = SECONDS_PER_HOUR   * 24
 SECONDS_PER_WEEK   = SECONDS_PER_DAY    * 7
 SECONDS_PER_MONTH  = SECONDS_PER_DAY    * 30 # OK, I'm approximating
 SECONDS_PER_YEAR   = SECONDS_PER_DAY    * 365
+
+INVALID_CHARS      = re.compile(r'[^A-Za-z0-9-_/.]')
+RET_SEPERATOR_CHAR = "_" # Character we use to separate the retentions
+RET_GRAPHITE_CHAR  = ":" # Character graphite uses to separate the retentions
 
 def _graphite_metric_list_retentions(metric_list, storage_schemas):
     """:type metric_list: list
@@ -29,7 +34,7 @@ def _graphite_metric_list_retentions(metric_list, storage_schemas):
         for s in storage_schemas:
             if s.test(metric_name):
                 return _input_retention_resolution(s.options['retentions'].split(','))
-    retentions = [ get_retentions(m[0])[1].replace(':', '_') for m in metric_list ]
+    retentions = [ get_retentions(m[0])[1].replace(RET_GRAPHITE_CHAR, RET_SEPERATOR_CHAR) for m in metric_list ]
     return retentions
 
 # how graphite will access kairosdb
@@ -163,8 +168,7 @@ def _make_graphite_name_cache(cache_tree, list_of_names):
         util._add_to_cache(cache_tree, n.split('.'))
 
 def graphite_metric_to_kairosdb(metric, tags):
-    """
-    :type metric: tuple
+    """:type metric: tuple
     :param metric: tuple of ("metric_name", timestamp, value)
 
     :type tags: dict
@@ -194,17 +198,24 @@ def graphite_metric_to_kairosdb(metric, tags):
     converting this when the data is written and read, and doesn't
     make the user deal with this conversion.
 
+    KairosDB only allows alphanumeric and the following punctuation characters:
+
+    ".", "/", "-", and "_".
+
+    Graphite is less restrictive.  Anything that doesn't match the
+    above are converted to an underscore.
+
     """
-    print metric
+    converted_metric_name = INVALID_CHARS.sub(TAG_SEPERATOR_CHAR, metric[0])
     return {
-        "name"      : metric[0],
+        "name"      : converted_metric_name,
         "timestamp" : metric[1],
         "value"     : metric[2],
         "tags"      : tags
     }
 
 
-def seconds_from_retention_tag(tag_value, sep=':'):
+def seconds_from_retention_tag(tag_value, sep=RET_GRAPHITE_CHAR):
     """:type tag_value: str
     :param tag_value: the retention info tag
 
@@ -279,8 +290,7 @@ def _lowest_resolution_retention(data, name):
     all_tags_set = set() # easiest case - all tags are the same, otherwise we use the set
     for result in values:
         all_tags_set.update(util.get_matching_tags_from_result(result, RETENTION_TAG))
-
-    return max([ seconds_from_retention_tag(tag) for tag in all_tags_set])# return the lowest resolution
+    return max([ seconds_from_retention_tag(tag, RET_SEPERATOR_CHAR) for tag in all_tags_set])# return the lowest resolution
 
 def read_absolute(conn, metric_name, start_time, end_time):
     """
