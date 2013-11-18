@@ -68,15 +68,14 @@ with open('LICENSE') as fp:
     license = fp.read()
 
 setup(
-    name='textblob',
-    version='0.3.5',
-    description='Simple, Pythonic text processing. Sentiment analysis, '
-                'POS tagging, noun phrase parsing, and more.',
+    name='pyKairosDB',
+    version='0.1.0',
+    description='Python library to interface with KairosDB',
     long_description=long_desc,
     license=license,
-    author='Steven Loria',
-    author_email='sloria1@gmail.com',
-    url='https://github.com/sloria/TextBlob',
+    author='Peter C. Norton',
+    author_email='null@void.com',
+    url='https://github.com/pcn/pyKairosDB',
     install_requires=['PyYAML', 'requests'],
     packages=find_packages(exclude=('test',)),
     package_data={
