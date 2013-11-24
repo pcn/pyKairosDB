@@ -6,6 +6,7 @@ from util import tree
 from . import metadata
 from . import reader
 from collections import deque
+import fnmatch
 import re
 
 
@@ -109,26 +110,8 @@ def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
     This function caches the created tree for cache_ttl seconds and
     refreshes when the cache has aged beyond the cache_ttl.
     """
-
-    if "*" not in name:
-        return [u'{0}'.format(name)]
-
-    name_list = [ u'{0}'.format(n) for n in name.split(".")]
-    ts        = expand_graphite_wildcard_metric_name.cache_timestamp
-    cache_tree = expand_graphite_wildcard_metric_name.cache_tree
-    if ts == 0 or (time.time() - ts > cache_ttl):
-        all_metric_name_list = metadata.get_all_metric_names(conn)
-        cache_tree           = tree()
-        _make_graphite_name_cache(cache_tree, all_metric_name_list)
-        expand_graphite_wildcard_metric_name.cache_tree      = cache_tree
-        expand_graphite_wildcard_metric_name.cache_timestamp = time.time()
-    if name == "*": # special case for the root of the tree:
-        return cache_tree.keys()
-    expanded_name_list = util.metric_name_wildcard_expansion(cache_tree, name_list)
-    return [ u".".join(en) for en in expanded_name_list]
-
-expand_graphite_wildcard_metric_name.cache_tree = tree()
-expand_graphite_wildcard_metric_name.cache_timestamp = 0
+    all_metric_name_list = metadata.get_all_metric_names(conn)
+    return [ n for n in all_metric_name_list if fnmatch.fnmatch(n, name) ]
 
 
 def leaf_or_branch(conn, name):
@@ -151,21 +134,6 @@ def leaf_or_branch(conn, name):
         return "branch"
     else:
         return "leaf"
-
-
-def _make_graphite_name_cache(cache_tree, list_of_names):
-    """    :type cache_tree: defaultdict
-    :param cache_tree: a defaultdict initialized with the tree() function.  Contains names
-        of entries in the kairosdb, separated by "." per the graphite convention.
-
-    :type list_of_names: list
-    :param list_of_names: list of strings, in order, that will be sought after in the cache tree.
-
-    Given a list of names - all name - that kairosdb has, make a
-    tree of all those names.
-    """
-    for n in list_of_names:
-        util._add_to_cache(cache_tree, n.split('.'))
 
 def graphite_metric_to_kairosdb(metric, tags):
     """:type metric: tuple
@@ -331,7 +299,7 @@ def read_absolute(conn, metric_name, start_time, end_time):
             reader.group_by([group_by], query_dict["metrics"][0])
             reader.aggregation([aggregator], query_dict["metrics"][0])
         return modify_query_closure
-    # re-fetch now that we've gotten the content and set the retention time.
+    # now that we've gotten the tags and have set the retention time, get data
     content = conn.read_absolute([metric_name], start_time, end_time,
         query_modifying_function=modify_query())
     return_list = list()
