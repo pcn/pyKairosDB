@@ -84,7 +84,7 @@ def graphite_metric_list_with_retentions_to_kairosdb_list(metric_list, storage_s
         yield graphite_metric_to_kairosdb(m, tags=tags)
 
 
-def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
+def _fnmatch_expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
     """
     :type conn: pyKairosDB.KairosDBConnection
     :param conn: the connection to the database
@@ -113,6 +113,63 @@ def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
     all_metric_name_list = metadata.get_all_metric_names(conn)
     return [ n for n in all_metric_name_list if fnmatch.fnmatch(n, name) ]
 
+def expand_graphite_wildcard_metric_name(conn, name, cache_ttl=60):
+    """
+    :type conn: pyKairosDB.KairosDBConnection
+    :param conn: the connection to the database
+
+    :type name: string
+    :param name: the graphite-like name which can include ".*." to provide wildcard expansion
+
+    :type cache_ttl: int
+    :param cache_ttl: how often to update the cache from KairosDB, in seconds
+
+    :rtype: list
+    :return: a list of unicode strings.  Each unicode string contains an expanded metric name.
+
+    KairosDB doesn't currently support wildcards, so get all metric
+    names and expand them.
+
+    Currently only ".*." or "\*." or ".\*" expansions are supported.
+    Substring expansions aren't supported at this time.
+
+    Graphite-web uses fnmatch or something similar, perhaps this
+    should provide a list and re-use the same functionality.
+
+    This function caches the created tree for cache_ttl seconds and
+    refreshes when the cache has aged beyond the cache_ttl.
+    """
+
+    if "*" not in name:
+        return [u'{0}'.format(name)]
+
+    if "." in name:
+        name_list = [ u'{0}'.format(n) for n in name.split(".")]
+    else:
+        name_list = [ name ]
+    # print "Name_list is {0}".format(name_list)
+
+    ts        = expand_graphite_wildcard_metric_name.cache_timestamp
+    cache_tree = expand_graphite_wildcard_metric_name.cache_tree
+    if ts == 0 or (time.time() - ts > cache_ttl):
+        all_metric_name_list = metadata.get_all_metric_names(conn)
+        cache_tree           = tree()
+        _make_graphite_name_cache(cache_tree, all_metric_name_list)
+        expand_graphite_wildcard_metric_name.cache_tree      = cache_tree
+        expand_graphite_wildcard_metric_name.cache_timestamp = time.time()
+    if name == "*": # special case for the root of the tree:
+        return cache_tree.keys()
+    if '*' in name and not '.' in name:
+        return [ ctk for ctk in cache_tree.keys() if fnmatch.fnmatch(ctk, name)]
+    expanded_name_list = util.metric_name_wildcard_expansion(cache_tree, name_list)
+    # print "expanded_name_list is {0}".format(expanded_name_list)
+
+    return_list = [ ".".join(en) for en in expanded_name_list]
+    return list(set(return_list))
+
+expand_graphite_wildcard_metric_name.cache_tree = tree()
+expand_graphite_wildcard_metric_name.cache_timestamp = 0
+
 
 def leaf_or_branch(conn, name):
     """
@@ -129,11 +186,31 @@ def leaf_or_branch(conn, name):
     its ultimate storage location that is, whether or not it can be
     traversed further
     """
-    wildcard_expansion = expand_graphite_wildcard_metric_name(conn, name + ".*")
+    # print "Trying to expand the name {0}".format(name)
+    if name.endswith('*'):
+        wildcard_expansion = expand_graphite_wildcard_metric_name(conn, name)
+    else:
+        wildcard_expansion = expand_graphite_wildcard_metric_name(conn, name + ".*")
+
     if len(wildcard_expansion) > 0:
         return "branch"
     else:
         return "leaf"
+
+
+def _make_graphite_name_cache(cache_tree, list_of_names):
+    """    :type cache_tree: defaultdict
+    :param cache_tree: a defaultdict initialized with the tree() function.  Contains names
+        of entries in the kairosdb, separated by "." per the graphite convention.
+
+    :type list_of_names: list
+    :param list_of_names: list of strings, in order, that will be sought after in the cache tree.
+
+    Given a list of names - all name - that kairosdb has, make a
+    tree of all those names.
+    """
+    for n in list_of_names:
+        util._add_to_cache(cache_tree, n.split('.'))
 
 def graphite_metric_to_kairosdb(metric, tags):
     """:type metric: tuple
@@ -288,7 +365,7 @@ def read_absolute(conn, metric_name, start_time, end_time):
     tags = conn.read_absolute([metric_name], start_time, end_time,
                               query_modifying_function=cache_query(),
                               only_read_tags=True)
-    print tags
+
     interval_seconds = _lowest_resolution_retention(tags, metric_name)
     def modify_query():
         def modify_query_closure(query_dict):
