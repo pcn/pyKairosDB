@@ -192,7 +192,12 @@ def leaf_or_branch(conn, name):
     else:
         wildcard_expansion = expand_graphite_wildcard_metric_name(conn, name + ".*")
 
-    if len(wildcard_expansion) > 0:
+    print "foo"
+    print wildcard_expansion
+    print "foo"
+    if len(wildcard_expansion) == 1 and wildcard_expansion[0] == name:
+        return "leaf"
+    elif len(wildcard_expansion) > 0:
         return "branch"
     else:
         return "leaf"
