@@ -1,7 +1,10 @@
 # -*- python -*-
 
 """This module contains ease-of-use functions"""
+import sys
 import time
+import itertools
+import fnmatch
 
 from collections import defaultdict
 from . import metadata as metadata
@@ -174,18 +177,20 @@ def _match_in_cache(cache_tree, list_of_names):
     that is, the keys that reside under the prefix.
     """
     head_item = list_of_names[0]
+    # print "head_item is {0}".format(head_item)
+    head_item_matches = [ m for m in cache_tree.keys() if fnmatch.fnmatch(m, head_item) ]
     if head_item not in cache_tree.keys():
+        # print "A"
         return [] # Empty List to signify we're done here
     elif len(list_of_names) == 1:
+        # print "B"
         return cache_tree[head_item].keys()
     else:
+        # print "C"
         tail_list = list_of_names[1:]
         return _match_in_cache(cache_tree[head_item], tail_list)
 
-
-
-
-def metric_name_wildcard_expansion(cache_tree, name_list, wildcard_char="*"):
+def _metric_name_wildcard_expansion(cache_tree, name_list):
     """
     :param cache_tree: defaultdict
     :description cache_tree: a defaultdict initialized with the tree() function
@@ -199,10 +204,7 @@ def metric_name_wildcard_expansion(cache_tree, name_list, wildcard_char="*"):
     Given some metrics, break up the list around wildcard entries and
     return all those that match.
 
-    This only supports wildcards that are standalone - e.g. I don't
-    know whether or not the web ui expects "foo.* and foo.a* to both
-    work (the former I know works, the latter, well...?) but this will
-    only deal with an * surrounded by a wildcard.
+    This supports wildcards that match fnmatch rules.
 
     This only returns the prefixes implied by the *.   E.g. for the list::
 
@@ -231,24 +233,63 @@ def metric_name_wildcard_expansion(cache_tree, name_list, wildcard_char="*"):
         [['a', 'b', 'd', 'a']], [['a', 'b', 'd', 'b']], [['a', 'b', 'd', 'c']]
 
     """
-    count = 0
+    if len(name_list) == 0: # Catch an empty list being passed in.
+        return []
     complete_list = list()
-    for n in range(len(name_list)):
-        if name_list[n] == wildcard_char:
-            before_list = name_list[0:n]
-            after_list = name_list[n+1:]
-            # print "before_list is {0}, n is {1}".format(before_list, n)
-            expansion_list = _match_in_cache(cache_tree, before_list)
-            expanded_name_list_of_list = [before_list + [e] + after_list for e in expansion_list ]
+    names_head = name_list[0]
+    names_rest = name_list[1:]
+    matches = [ n for n in cache_tree.keys() if fnmatch.fnmatch(n, names_head) ]
+    # print "matches are {0}".format(matches)
+    for m in matches:
+        # print "m is {0}".format(m)
+        this_list = [m]
+        expansion = _metric_name_wildcard_expansion(cache_tree[m], names_rest)
+        # print "Expansion is {0}".format(expansion)
+        for e in expansion:
+            this_list.extend(expansion)
+            # print "This_list is now {0}".format(this_list)
+        complete_list.extend([this_list])
+    # print "Returning complete_list of {0}".format(complete_list)
+    return complete_list
 
-            for expansion in expanded_name_list_of_list:
-                expanded_maybe_empty = metric_name_wildcard_expansion(cache_tree, expansion)
-                # print "Expanded_maybe_empty is {0}".format(expanded_maybe_empty)
-                if len(expanded_maybe_empty) > 0:
-                    if len(after_list) == 0: # if this is a terminal node in the tree, then append
-                        complete_list.append(expanded_maybe_empty)
-                    else: # otherwise, extend the complete list, this is already a list_of_lists
-                        complete_list.extend(expanded_maybe_empty)
-            # print "returning complete_list: {0}".format(complete_list)
-            return complete_list # Any other stars will be expanded recursively.
-    return name_list # There were no asterisks
+def _almost_flatten(metrics):
+    """Turn a nested list (e.g. ['foo', ['bar', 'baz', ['tor, 'tar']]] into
+    a flattened list of names anchored at the first element:
+    [["foo", "bar", "baz", "tor"],
+     ["foo", "bar", "baz", "tar"]]
+
+    Two notes for posterity.: This does extra work, recursinge too
+    often.  Also up the stack, the caller needs to remove duplicates.
+    The order of top-level metrics are expected to be small, maybe
+    10-20, so the extra work shouldn't be explosively bad.  If it ever
+    gets that way, then fix this hack.
+
+    """
+    metric_part_list = list()
+    metric_head = metrics[0]
+    metric_tail = metrics[1:]
+    # print "metric_head, metric_tail: {0}, {1}".format(metric_head, metric_tail)
+    if metric_tail == []:
+        return [metric_head]
+    for mt in metric_tail:
+        result = _almost_flatten(mt)
+        # print "result is {0}".format(result)
+        for r in result:
+            tail_list   = list()
+            tail_list.append(metric_head)
+            if type(r) in (type(list()), type(tuple())):
+                tail_list.extend(r)
+            else:
+                tail_list.append(r)
+            metric_part_list.append(tail_list)
+    return metric_part_list
+
+
+
+def metric_name_wildcard_expansion(cache_tree, name_list):
+    metric_name_list = _metric_name_wildcard_expansion(cache_tree, name_list)
+    return_list = list()
+    for m in metric_name_list:
+        # print "m is {0}".format(m)
+        return_list.extend(_almost_flatten(m))
+    return return_list

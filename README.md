@@ -74,6 +74,7 @@ API for writing graphite metrics:
 import pyKairosDB
 import time
 import sys
+from pyKairosDB import graphite as g
 c = pyKairosDB.connect() # use localhost:8080, the default, no ssl
 if sys.argv > 1:
   metric_name = sys.argv[1]
@@ -89,7 +90,7 @@ for m in range(5):
     graphite_metric_list.append((metric_name, time.time(), time.time(),))
     time.sleep(0.1)
 
-r = c.write_metrics(pyKairosDB.graphite.graphite_metric_list_to_kairosdb_list(graphite_metric_list, graphite_tags_60s_1d))
+r = c.write_metrics(g.graphite_metric_list_to_kairosdb_list(graphite_metric_list, graphite_tags_60s_1d))
 ```
 
 API for reading graphite-style metrics:
