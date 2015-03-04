@@ -83,7 +83,8 @@ class KairosDBConnection(object):
         """
         return writer.write_metrics_list(self, metric_list)
 
-    def read_relative(self, metric_names_list, start_time, end_time=None, query_modifying_function=None, tags=False):
+    def read_relative(self, metric_names_list, start_time=0, end_time=None,
+                      query_modifying_function=None, only_read_tags=False, tags=False):
         """
         :type metric_names_list: list
         :param metric_names_list: list of metric names to be queried
@@ -108,10 +109,11 @@ class KairosDBConnection(object):
         an end time, which means "now")
         """
         return reader.read_relative(self, metric_names_list, start_time, end_time,
-            query_modifying_function=query_modifying_function)
+                                    query_modifying_function=query_modifying_function,
+                                    only_read_tags=only_read_tags, tags=tags)
 
-    def read_absolute(self, metric_names_list, start_time, end_time=None,
-                      query_modifying_function=None, only_read_tags=False):
+    def read_absolute(self, metric_names_list, start_time=0, end_time=None,
+                      query_modifying_function=None, only_read_tags=False, tags=False):
         """
         :type metric_names_list: list
         :param metric_names_list: list of metric names to be queried
@@ -138,4 +140,4 @@ class KairosDBConnection(object):
         """
         return reader.read_absolute(self, metric_names_list, start_time, end_time,
                                     query_modifying_function=query_modifying_function,
-                                    only_read_tags=only_read_tags)
+                                    only_read_tags=only_read_tags, tags=tags)

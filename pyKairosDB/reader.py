@@ -155,9 +155,14 @@ def cache_time(cache_time, query_dict):
     query_dict["cache_time"] = cache_time
 
 
+def add_tags_to_query(query, tags):
+    query['metrics'][0]['tags'] = tags
+    return query
+
+
 def read(conn, metric_names, start_absolute=None, start_relative=None,
          end_absolute=None, end_relative=None, query_modifying_function=None,
-         only_read_tags=False):
+         only_read_tags=False, tags=None):
     """:type conn: pyKairosDB.connect object
     :param conn: the interface to the requests library
 
@@ -202,6 +207,8 @@ def read(conn, metric_names, start_absolute=None, start_relative=None,
         read_url = conn.read_url
 
     query["metrics"] = [ {"name" : m } for m in metric_names ]
+    if tags:
+        query = add_tags_to_query(query, tags)
     if query_modifying_function is not None:
         query_modifying_function(query)
     r = requests.post(read_url, json.dumps(query))
@@ -272,14 +279,14 @@ def read_relative(conn, metric_names, start, end=None, tags=None,
     """If end_relative is empty, "now" is implied"""
     return read(conn, metric_names, start_relative=start, end_relative=end,
                 query_modifying_function=query_modifying_function,
-                only_read_tags=only_read_tags)
+                only_read_tags=only_read_tags, tags=tags)
 
 def read_absolute(conn, metric_names, start, end=None, tags=None,
                   query_modifying_function=None, only_read_tags=False):
     """If end_absolute is empty, time.time() is implied"""
     return read(conn, metric_names, start_absolute=start, end_absolute=end,
                 query_modifying_function=query_modifying_function,
-                only_read_tags=only_read_tags)
+                only_read_tags=only_read_tags, tags=tags)
 
 
 def _change_timestamps_to_python(content):
