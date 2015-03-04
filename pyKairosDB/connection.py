@@ -5,6 +5,7 @@ from . import writer
 from . import reader
 from . import metadata
 from . import graphite
+from . import deleter
 
 class KairosDBConnection(object):
     """
@@ -48,6 +49,8 @@ class KairosDBConnection(object):
         self.read_url     = "{0}://{1}:{2}/api/v1/datapoints/query".format(self.schema, self.server, self.port)
         self.read_tag_url = "{0}://{1}:{2}/api/v1/datapoints/query/tags".format(self.schema, self.server, self.port)
         self.write_url    = "{0}://{1}:{2}/api/v1/datapoints".format(self.schema, self.server, self.port)
+        self.delete_dps_url = "{0}://{1}:{2}/api/v1/datapoints/delete".format(self.schema, self.server, self.port)
+        self.delete_metric_url = "{0}://{1}:{2}/api/v1/metric/".format(self.schema, self.server, self.port)
 
     def write_one_metric(self, name, timestamp, value, tags):
         """
@@ -84,7 +87,7 @@ class KairosDBConnection(object):
         return writer.write_metrics_list(self, metric_list)
 
     def read_relative(self, metric_names_list, start_time=0, end_time=None,
-                      query_modifying_function=None, only_read_tags=False, tags=False):
+                      query_modifying_function=None, only_read_tags=False, tags=None):
         """
         :type metric_names_list: list
         :param metric_names_list: list of metric names to be queried
@@ -113,7 +116,7 @@ class KairosDBConnection(object):
                                     only_read_tags=only_read_tags, tags=tags)
 
     def read_absolute(self, metric_names_list, start_time=0, end_time=None,
-                      query_modifying_function=None, only_read_tags=False, tags=False):
+                      query_modifying_function=None, only_read_tags=False, tags=None):
         """
         :type metric_names_list: list
         :param metric_names_list: list of metric names to be queried
@@ -141,3 +144,35 @@ class KairosDBConnection(object):
         return reader.read_absolute(self, metric_names_list, start_time, end_time,
                                     query_modifying_function=query_modifying_function,
                                     only_read_tags=only_read_tags, tags=tags)
+
+    def delete_datapoints(self, metric_names_list, start_time, end_time=None, tags=None):
+        """
+        :type metric_names_list: list
+        :param metric_names_list: list of metric names to be queried.
+
+        :type start_time: float
+        :param start_time: The start time for this read request as seconds since the epoch (per python's time.time())
+
+        :type end_time: float
+        :param end_time: The end time for this read request as seconds since the epoch (per python's time.time())
+
+        :type only_read_tags: bool
+        :param only_read_tags: Whether the query will be for tags or for tags and data.  Default is both.
+
+        :type tags: dict
+        :param tags: Tags to be searched in metrics. Allows to filter the results to only metric which contain specified
+        tags in case only_read_tags=True.
+
+        Performs the query made from specified parameters and deletes all data points returned by the query.
+        Aggregators and groupers have no effect on which data points are deleted.
+        Note: Works for the Cassandra and H2 data store only.
+        """
+        return deleter.delete_datapoints(self, metric_names_list, start_time, 
+                                         end_time, tags=tags)
+
+    def delete_metrics(self, metric_names_list):
+        """
+        :type metric_names_list: list
+        :param metric_names_list: list of metric names to be deleted.
+        """
+        return deleter.delete_metrics(self, metric_names_list)
