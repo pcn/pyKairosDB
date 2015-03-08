@@ -156,6 +156,13 @@ def cache_time(cache_time, query_dict):
 
 
 def add_tags_to_query(query, tags):
+    """
+    :type query: dict
+    :param query: A dictionary describing the entire query.
+
+    :type tags: dict
+    :param tags: A dictionary which will be added to query to filter the results.
+    """
     query['metrics'][0]['tags'] = tags
     return query
 
@@ -163,7 +170,8 @@ def add_tags_to_query(query, tags):
 def read(conn, metric_names, start_absolute=None, start_relative=None,
          end_absolute=None, end_relative=None, query_modifying_function=None,
          only_read_tags=False, tags=None):
-    """:type conn: pyKairosDB.connect object
+    """
+    :type conn: pyKairosDB.connect object
     :param conn: the interface to the requests library
 
     :type metric_names: list
@@ -191,6 +199,10 @@ def read(conn, metric_names, start_absolute=None, start_relative=None,
 
     :type only_read_tags: boolean
     :param only_read_tags: A boolean determining whether we are querying tags or metrics
+
+    :type tags: dict
+    :param tags: Tags to be searched in metrics. Allows to filter the results to only metric which contain specified
+        tags in case only_read_tags=True.
 
     :rtype: dict
     :return: a dictionary that reflects the json returned from the kairosdb, with timestamps changed to seconds

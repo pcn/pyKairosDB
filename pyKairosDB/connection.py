@@ -86,7 +86,7 @@ class KairosDBConnection(object):
         """
         return writer.write_metrics_list(self, metric_list)
 
-    def read_relative(self, metric_names_list, start_time=0, end_time=None,
+    def read_relative(self, metric_names_list, start_time, end_time=None,
                       query_modifying_function=None, only_read_tags=False, tags=None):
         """
         :type metric_names_list: list
@@ -104,6 +104,13 @@ class KairosDBConnection(object):
         :param query_modifying_function: A function that accepts one argument: the query being created.  It can be used
             to arbitrarily modify the contents of the request.  Intended for applying modifications to aggregators and
             grouping and caching when appropriate values for these are discovered.
+
+        :type only_read_tags: bool
+        :param only_read_tags: Whether the query will be for tags or for tags and data.  Default is both.
+
+        :type tags: dict
+        :param tags: Contains tags which will be added to the query. If only_read_tags=True, will filter the results to
+            those that have specified tags.
 
         :rtype: requests.response
         :return: a requests.response object with the results of the write
@@ -134,6 +141,10 @@ class KairosDBConnection(object):
 
         :type only_read_tags: bool
         :param only_read_tags: Whether the query will be for tags or for tags and data.  Default is both.
+
+        :type tags: dict
+        :param tags: Contains tags which will be added to the query. If only_read_tags=True, will filter the results to
+            those that have specified tags.
 
         :rtype: requests.response
         :return: a requests.response object with the results of the write
