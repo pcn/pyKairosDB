@@ -122,7 +122,7 @@ class KairosDBConnection(object):
                                     query_modifying_function=query_modifying_function,
                                     only_read_tags=only_read_tags, tags=tags)
 
-    def read_absolute(self, metric_names_list, start_time=0, end_time=None,
+    def read_absolute(self, metric_names_list, start_time, end_time=None,
                       query_modifying_function=None, only_read_tags=False, tags=None):
         """
         :type metric_names_list: list
