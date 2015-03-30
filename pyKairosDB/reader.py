@@ -155,10 +155,23 @@ def cache_time(cache_time, query_dict):
     query_dict["cache_time"] = cache_time
 
 
+def add_tags_to_query(query, tags):
+    """
+    :type query: dict
+    :param query: A dictionary describing the entire query.
+
+    :type tags: dict
+    :param tags: A dictionary which will be added to query to filter the results.
+    """
+    query['metrics'][0]['tags'] = tags
+    return query
+
+
 def read(conn, metric_names, start_absolute=None, start_relative=None,
          end_absolute=None, end_relative=None, query_modifying_function=None,
-         only_read_tags=False):
-    """:type conn: pyKairosDB.connect object
+         only_read_tags=False, tags=None):
+    """
+    :type conn: pyKairosDB.connect object
     :param conn: the interface to the requests library
 
     :type metric_names: list
@@ -187,6 +200,10 @@ def read(conn, metric_names, start_absolute=None, start_relative=None,
     :type only_read_tags: boolean
     :param only_read_tags: A boolean determining whether we are querying tags or metrics
 
+    :type tags: dict
+    :param tags: Tags to be searched in metrics. Allows to filter the results to only metric which contain specified
+        tags in case only_read_tags=True.
+
     :rtype: dict
     :return: a dictionary that reflects the json returned from the kairosdb, with timestamps changed to seconds
         since the epoch (from KairosDBs native milliseconds since the epoch).
@@ -198,13 +215,18 @@ def read(conn, metric_names, start_absolute=None, start_relative=None,
         query = _query_absolute(start_absolute, end_absolute)
     if only_read_tags is True:
         read_url = conn.read_tag_url
+        print read_url
     else:
         read_url = conn.read_url
 
     query["metrics"] = [ {"name" : m } for m in metric_names ]
+    if tags:
+        query = add_tags_to_query(query, tags)
+        print query
     if query_modifying_function is not None:
         query_modifying_function(query)
     r = requests.post(read_url, json.dumps(query))
+    print "Results are: ", r.json()
     return _change_timestamps_to_python(r.content)
 
 def _query_relative(start, end=None):
@@ -272,14 +294,14 @@ def read_relative(conn, metric_names, start, end=None, tags=None,
     """If end_relative is empty, "now" is implied"""
     return read(conn, metric_names, start_relative=start, end_relative=end,
                 query_modifying_function=query_modifying_function,
-                only_read_tags=only_read_tags)
+                only_read_tags=only_read_tags, tags=tags)
 
 def read_absolute(conn, metric_names, start, end=None, tags=None,
                   query_modifying_function=None, only_read_tags=False):
     """If end_absolute is empty, time.time() is implied"""
     return read(conn, metric_names, start_absolute=start, end_absolute=end,
                 query_modifying_function=query_modifying_function,
-                only_read_tags=only_read_tags)
+                only_read_tags=only_read_tags, tags=tags)
 
 
 def _change_timestamps_to_python(content):
