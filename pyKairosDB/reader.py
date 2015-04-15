@@ -215,18 +215,18 @@ def read(conn, metric_names, start_absolute=None, start_relative=None,
         query = _query_absolute(start_absolute, end_absolute)
     if only_read_tags is True:
         read_url = conn.read_tag_url
-        print read_url
+        # print read_url
     else:
         read_url = conn.read_url
 
     query["metrics"] = [ {"name" : m } for m in metric_names ]
     if tags:
         query = add_tags_to_query(query, tags)
-        print query
+        # print query
     if query_modifying_function is not None:
         query_modifying_function(query)
     r = requests.post(read_url, json.dumps(query))
-    print "Results are: ", r.json()
+    # print "Results are: ", r.json()
     return _change_timestamps_to_python(r.content)
 
 def _query_relative(start, end=None):
